@@ -1,0 +1,53 @@
+#introSection {
+  border: 1px solid #2a3140;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100vh;
+  gap: 20px;
+}
+
+#inputSection {
+  flex: 2;
+  border: 1px solid #2a3140;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #181c25;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.right-panel section {
+  background-color: #181c25;
+  border: 1px solid #2a3140;
+  border-radius: 8px;
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.canvas-wrapper {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #2a3140;
+  overflow: hidden;
+}
+#imageCanvas {
+  display: block;
+  image-rendering: pixelated;
+}
+#pixelHighlighter {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
