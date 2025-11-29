@@ -42,7 +42,7 @@ runLZW = (indexStream, Woerterbuch) => {
   console.log("Final Woerterbuch:", Woerterbuch);
 };
 
-runLZW(["a", "b", "a", "b", "c", "a", "b", "a", "c"], {
+runLZW(["a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"], {
   a: 1,
   b: 2,
   c: 3,

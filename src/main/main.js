@@ -9,15 +9,91 @@
  * ============================================================================
  */
 
+/**
+ * Image Input
+ *
+ * @type {*}
+ */
 const imgInput = document.getElementById("img-input");
+/**
+ * Source Image img
+ *
+ * @type {*}
+ */
 const sourceImage = document.getElementById("source-image");
+/**
+ * Canvas
+ *
+ * @type {*}
+ */
 const imageCanvas = document.getElementById("image-canvas");
+/**
+ * pixelHighliger div
+ *
+ * @type {*}
+ */
 const pixelHighlighter = document.getElementById("pixel-highlighter");
+/**
+ * Canvas Context
+ *
+ * @type {*}
+ */
 const ctx = imageCanvas.getContext("2d");
+/**
+ * Wörterbuch Tabelle Body (tbody)
+ *
+ * @type {*}
+ */
 const dictBody = document.getElementById("dict-body");
+/**
+ * Wörterbuch Tabelle div Wrapper
+ *
+ * @type {*}
+ */
 const tableWrapper = document.querySelector(".table-wrapper");
+/**
+ * Demo Starten Button
+ *
+ * @type {*}
+ */
+const startDemoBtn = document.getElementById("start-demo-btn");
+/**
+ *  Sto/Reset Button
+ *
+ * @type {*}
+ */
+const stopDemoBtn = document.getElementById("stop-demo-btn");
+/**
+ *  Output Box
+ *
+ * @type {*}
+ */
+const outputContainer = document.getElementById("output-container");
 
+/**
+ * Woerterbuch für LZW
+ *
+ * @type {{}}
+ */
 const Woerterbuch = initializeWoerterbuch();
+/**
+ * Index Stream des geladenen Bildes von transformImageDataToIndexStream
+ *
+ * @type {*}
+ */
+let indexStream = null;
+/**
+ * Color Palette des geladenen Bildes von transformImageDataToIndexStream
+ *
+ * @type {*}
+ */
+let globalColorPalette = null;
+/**
+ * Flag ob die Demo läuft
+ *
+ * @type {boolean}
+ */
+let isDemoRunning = false;
 
 // Initialisiere das Wörterbuch im UI
 setWoerterbuchTabelle(Woerterbuch);
@@ -60,20 +136,44 @@ sourceImage.onload = () => {
   );
 
   const imgData = ctx.getImageData(0, 0, sourceImage.width, sourceImage.height);
-  const { indexStream, colorPalette } = prepareDataForLZW(imgData);
+  const result = transformImageDataToIndexStream(imgData);
+  indexStream = result.indexStream;
+  globalColorPalette = result.colorPalette;
 
   console.log("Index Stream:", indexStream);
-  console.log("Color Palette:", colorPalette);
-
-  runLZW(indexStream, Woerterbuch);
-
-  //   TODO Pixel Highlighting implementieren
-
-  //   pixelHighlighter.style.display = "block";
-  //   pixelHighlighter.style.transform = `translate(0px, 0px)`;
-  //   pixelHighlighter.style.width = `1px`;
-  //   pixelHighlighter.style.height = `1px`;
+  console.log("Color Palette:", globalColorPalette);
 };
+
+startDemoBtn.addEventListener("click", async () => {
+  if (isDemoRunning) return;
+  const Woerterbuch = initializeWoerterbuch();
+  setWoerterbuchTabelle(Woerterbuch);
+
+  const outputContainer = document.getElementById("output-container");
+  outputContainer.innerHTML = "";
+  // Security Check: Has an image been loaded?
+  if (!indexStream || indexStream.length === 0) {
+    alert("Bitte zuerst ein Bild laden!");
+    console.error("IndexStream is empty or undefined");
+    return;
+  }
+
+  isDemoRunning = true;
+  startDemoBtn.disabled = true;
+  stopDemoBtn.disabled = false;
+
+  console.log("Starting LZW with:", indexStream);
+
+  // Now both variables are available
+  await runLZW(indexStream, Woerterbuch);
+});
+
+stopDemoBtn.addEventListener("click", () => {
+  isDemoRunning = false;
+  startDemoBtn.disabled = false;
+  stopDemoBtn.disabled = true;
+  console.log("Stop requested...");
+});
 
 /**
  * Initialisiert die Woerterbuch Tabelle im UI
@@ -101,12 +201,14 @@ function initializeWoerterbuch() {
 
 /**
  * Fügt eine neue Zeile in die Tabelle hinzu
+ * Ist aufgerufen in runLZW
  *
  * @param {String} code
  * @param {String} pattern
  */
 function addDictRowToUI(code, pattern) {
-  const row = "<tr><td>" + code + "</td><td>" + pattern + "</td></tr>";
+  const row =
+    '<tr class="new-row"><td>' + code + "</td><td>" + pattern + "</td></tr>";
   const dictBody = document.getElementById("dict-body");
   const tableWrapper = document.querySelector(".table-wrapper");
 
@@ -115,6 +217,41 @@ function addDictRowToUI(code, pattern) {
     tableWrapper.scrollTop = tableWrapper.scrollHeight;
   }
 }
+
+/**
+ * Fügt einen neuen Output-Chip im UI hinzu
+ * Ist aufgerufen in runLZW
+ *
+ * @param {*} code
+ * @param {*} symbol
+ */
+function addOutputToUI(code, symbol) {
+  const chip = document.createElement("div");
+  chip.classList.add("output-chip");
+  chip.innerText = symbol;
+
+  if (code == 256 || code == 257) {
+    chip.classList.add("chip-control");
+    if (code == 256) chip.innerText = "CLEAR";
+    if (code == 257) chip.innerText = "END";
+  } else if (code > 257) {
+    chip.classList.add("chip-compressed");
+  } else {
+    chip.classList.add("chip-single");
+  }
+
+  outputContainer.appendChild(chip);
+  if (outputContainer) {
+    outputContainer.scrollTop = outputContainer.scrollHeight;
+  }
+}
+
+/**
+ * Description placeholder
+ *
+ * @param {*} x
+ * @param {*} y
+ */
 function updateHighlighterPosition(x, y) {
   // TODO Implement highlighter position update
 }

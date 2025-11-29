@@ -10,13 +10,14 @@
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * Da Canvas ImageData nur rohe RGBA-Werte liefert, müssen die Daten in Farbindizes umgewandelt werden.
+ * Geht nur bis zu 256 Farben (GIF Limit)
  *
  *
  * @param {*} imageData - ImageData Objekt vom Canvas
  *
  * @returns {Object} { indexStream: Array<number>, colorPalette: Array<String>}
  */
-function prepareDataForLZW(imageData) {
+function transformImageDataToIndexStream(imageData) {
   const rawData = imageData.data; // [r,g,b,a, r,g,b,a, ...]
   const indexStream = []; // Array der Farbindizes
   const colorPalette = []; // Array der eindeutigen Farben e.g. ['255,0,0', '0,255,0', ...]
@@ -38,8 +39,7 @@ function prepareDataForLZW(imageData) {
         console.warn(
           "Mehr als 256 Farben im Bild! GIF unterstützt nur 256 Farben."
         );
-        // TODO: FarbQuantisierung implementieren (Nachfragen, ob das ueberhaupt gemacht werden soll)
-        // TODO: Wenn nicht, dann sollte der Prozess abbrechen
+        // TODO: Prozzes abbrechen und Warnung in der UI anzeigen
       }
     }
     indexStream.push(colorMap[colorKey]);
@@ -68,8 +68,13 @@ async function runLZW(indexStream, Woerterbuch) {
   // updateHighlighterPosition(0, 0)
 
   for (let i = 1; i < indexStream.length; i++) {
+    if (!isDemoRunning) {
+      console.log("Process aborted by user.");
+      return; // Exit the function immediately
+    }
+
     const k = String(indexStream[i]);
-    const wk = w + "," + k;
+    const wk = w + " " + k;
 
     if (wk in Woerterbuch) {
       w = wk;
@@ -80,11 +85,11 @@ async function runLZW(indexStream, Woerterbuch) {
 
       Woerterbuch[wk] = nextCode;
       addDictRowToUI(nextCode, wk);
-      await sleep(0);
       nextCode++;
 
       w = String(k);
     }
+    await sleep(100);
   }
   if (w !== "") {
     let codeOutput = Woerterbuch[w];
@@ -96,21 +101,4 @@ async function runLZW(indexStream, Woerterbuch) {
   addOutputToUI(Woerterbuch["end"], "END CODE");
 
   console.log("Final Output Stream:", outputStream);
-}
-/**
- * Description placeholder
- *
- * @param {*} x
- * @param {*} y
- */
-
-// TODO Output Datenstrom, zur Zeit nur in der Konsole
-/**
- * Description placeholder
- *
- * @param {*} code
- * @param {*} symbol
- */
-function addOutputToUI(code, symbol) {
-  console.log(`OUT: ${code}, Symbol: ${symbol}`);
 }

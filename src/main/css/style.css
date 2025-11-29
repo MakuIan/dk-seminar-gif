@@ -1,65 +1,167 @@
+:root {
+  /* --- Farb-Variablen --- */
+  --bg-panel: #181c25; /* Dunkler Hintergrund für Sektionen */
+  --border-primary: #2a3140; /* Standard Rahmenfarbe */
+
+  /* Chip Farben */
+  --chip-border-single: #2a3e40;
+  --chip-bg-compressed: #005f3d;
+  --chip-border-compressed: #484848;
+  --chip-glow: #00ff8c;
+  --chip-bg-control: #c53030; /* Clear / End Marker */
+}
+
+/* --- Layout --- */
+
 #intro-section {
-  border: 1px solid #2a3140;
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: 10px;
 }
 
 .main-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   height: 100vh;
   gap: 20px;
+  padding-bottom: 20px;
 }
 
 #input-section {
-  flex: 2;
-  border: 1px solid #2a3140;
+  flex: 1;
+  width: 100%;
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: 10px;
   overflow-y: auto;
-  background-color: #181c25;
+  background-color: var(--bg-panel);
 }
 
-.right-panel {
+.lower-panel {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 15px;
+  min-height: 0;
 }
 
-.right-panel section {
-  background-color: #181c25;
-  border: 1px solid #2a3140;
+.lower-panel section {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: 10px;
   flex-grow: 1;
+  overflow: hidden;
 }
+
 #lzw-dict-section {
-  height: 50%;
+  flex: 65;
+  height: auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
+
+#output-data-stream-section {
+  flex: 35;
+  display: flex;
+  flex-direction: column;
+}
+
 .table-wrapper {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
-  border: 1px solid #2a3140;
+  border: 1px solid var(--border-primary);
 }
+
 th {
   position: sticky;
   top: 0;
+  background-color: var(--bg-panel);
+  z-index: 1;
 }
+
+.new-row {
+  animation: slideInRow 0.6s ease-out;
+}
+@keyframes slideInRow {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+    background-color: transparent;
+  }
+}
+
 .canvas-wrapper {
   position: relative;
   display: inline-block;
-  border: 1px solid #2a3140;
+  border: 1px solid var(--border-primary);
   overflow: hidden;
 }
+
 #image-canvas {
   display: block;
   image-rendering: pixelated;
 }
+
+/* --- Output Chips Styling --- */
+
+#output-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  padding: 10px;
+  background-color: var(--bg-panel);
+  border-radius: 4px;
+  overflow-y: auto;
+  flex-grow: 1;
+  height: 100%;
+}
+
+.output-chip {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+  color: white;
+  border: 1px solid var(--border-primary);
+  animation: popIn 0.3s ease-out;
+}
+
+.chip-single {
+  border: 1px solid var(--chip-border-single);
+}
+
+.chip-compressed {
+  background-color: var(--chip-bg-compressed);
+  border-color: var(--chip-border-compressed);
+  font-weight: bold;
+  box-shadow: 0 0 5px var(--chip-glow);
+}
+
+.chip-control {
+  background-color: var(--chip-bg-control);
+  font-weight: bold;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 #pixel-highlighter {
   position: absolute;
   width: 1px;
