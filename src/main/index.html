@@ -30,7 +30,11 @@
             <button title="start-demo-btn" id="start-demo-btn">
               Demo Starten
             </button>
-            <button id="stop-demo-btn" disabled>Stop / Reset</button>
+            <button id="pause-demo-btn" disabled>Pause</button>
+            <button id="resume-demo-btn" disabled>Fortsetzen</button>
+            <button id="reset-demo-btn" disabled class="secondary">
+              Reset
+            </button>
           </li>
         </ul>
       </nav>
@@ -66,8 +70,9 @@
             <div id="pixel-highlighter"></div>
           </div>
           <!--Mit Status ist gemeint, welcher Pixel gerade codiert wird -->
-          <h3>Status:</h3>
-          <h3>Aktuelle Farbe:</h3>
+          <!-- <h3>Status:</h3>
+          <h3>Aktuelle Farbe:</h3> -->
+          <section id="index-stream-section"></section>
         </section>
         <div class="lower-panel">
           <section id="lzw-dict-section">
@@ -92,6 +97,7 @@
         </div>
       </div>
     </main>
+    <script src="ui.js"></script>
     <script src="main.js"></script>
     <script src="lzw.js"></script>
   </body>

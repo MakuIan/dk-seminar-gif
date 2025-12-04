@@ -10,71 +10,38 @@
  */
 
 /**
- * Image Input
- *
- * @type {*}
+ * HTML Elements
  */
 const imgInput = document.getElementById("img-input");
-/**
- * Source Image img
- *
- * @type {*}
- */
 const sourceImage = document.getElementById("source-image");
-/**
- * Canvas
- *
- * @type {*}
- */
 const imageCanvas = document.getElementById("image-canvas");
-/**
- * pixelHighliger div
- *
- * @type {*}
- */
 const pixelHighlighter = document.getElementById("pixel-highlighter");
-/**
- * Canvas Context
- *
- * @type {*}
- */
 const ctx = imageCanvas.getContext("2d");
-/**
- * Wörterbuch Tabelle Body (tbody)
- *
- * @type {*}
- */
 const dictBody = document.getElementById("dict-body");
-/**
- * Wörterbuch Tabelle div Wrapper
- *
- * @type {*}
- */
 const tableWrapper = document.querySelector(".table-wrapper");
-/**
- * Demo Starten Button
- *
- * @type {*}
- */
-const startDemoBtn = document.getElementById("start-demo-btn");
-/**
- *  Sto/Reset Button
- *
- * @type {*}
- */
-const stopDemoBtn = document.getElementById("stop-demo-btn");
-/**
- *  Output Box
- *
- * @type {*}
- */
+const indexStreamSection = document.getElementById("index-stream-section");
 const outputContainer = document.getElementById("output-container");
+/**
+ * ============================================================================
+ * BUTTONS & STATE
+ * ============================================================================
+ */
+const startBtn = document.getElementById("start-demo-btn");
+const pauseBtn = document.getElementById("pause-demo-btn");
+const resumeBtn = document.getElementById("resume-demo-btn");
+const resetBtn = document.getElementById("reset-demo-btn");
+
+const appState = {
+  running: false,
+  paused: false
+};
 
 /**
  * Woerterbuch für LZW
  *
  * @type {{}}
  */
+
 const Woerterbuch = initializeWoerterbuch();
 /**
  * Index Stream des geladenen Bildes von transformImageDataToIndexStream
@@ -88,12 +55,6 @@ let indexStream = null;
  * @type {*}
  */
 let globalColorPalette = null;
-/**
- * Flag ob die Demo läuft
- *
- * @type {boolean}
- */
-let isDemoRunning = false;
 
 // Initialisiere das Wörterbuch im UI
 setWoerterbuchTabelle(Woerterbuch);
@@ -139,17 +100,16 @@ sourceImage.onload = () => {
   const result = transformImageDataToIndexStream(imgData);
   indexStream = result.indexStream;
   globalColorPalette = result.colorPalette;
+  addIndexStreamOutputToUI(indexStream, globalColorPalette);
 
   console.log("Index Stream:", indexStream);
   console.log("Color Palette:", globalColorPalette);
 };
 
-startDemoBtn.addEventListener("click", async () => {
-  if (isDemoRunning) return;
-  const Woerterbuch = initializeWoerterbuch();
-  setWoerterbuchTabelle(Woerterbuch);
+// EventListener fuers Starten des Algos
+startBtn.addEventListener("click", async () => {
+  if (appState.running) return;
 
-  const outputContainer = document.getElementById("output-container");
   outputContainer.innerHTML = "";
   // Security Check: Has an image been loaded?
   if (!indexStream || indexStream.length === 0) {
@@ -157,36 +117,47 @@ startDemoBtn.addEventListener("click", async () => {
     console.error("IndexStream is empty or undefined");
     return;
   }
+  const Woerterbuch = initializeWoerterbuch();
+  setWoerterbuchTabelle(Woerterbuch);
 
-  isDemoRunning = true;
-  startDemoBtn.disabled = true;
-  stopDemoBtn.disabled = false;
+  appState.running = true;
+  appState.paused = false;
+  updateButtonState("running");
 
   console.log("Starting LZW with:", indexStream);
 
   // Now both variables are available
-  await runLZW(indexStream, Woerterbuch);
+  await runLZW(indexStream, Woerterbuch, appState);
+  if (appState.running) {
+    updateButtonState("finished");
+    appState.running = false;
+  }
 });
 
-stopDemoBtn.addEventListener("click", () => {
-  isDemoRunning = false;
-  startDemoBtn.disabled = false;
-  stopDemoBtn.disabled = true;
-  console.log("Stop requested...");
+// EventListener fuers Pausieren des Algos
+pauseBtn.addEventListener("click", () => {
+  console.log("presed Paused");
+  appState.paused = true;
+  updateButtonState("paused");
+  console.log("Paused");
 });
 
-/**
- * Initialisiert die Woerterbuch Tabelle im UI
- *
- * @param {Objekt} Woerterbuch
- */
-function setWoerterbuchTabelle(Woerterbuch) {
-  dictBody.innerHTML = Object.entries(Woerterbuch)
-    .map(([key, value]) => {
-      return `<tr><td>${key}</td><td>${value}</td></tr>`;
-    })
-    .join("");
-}
+// EventListener fuers Fortsetzen des Algos
+resumeBtn.addEventListener("click", () => {
+  appState.paused = false;
+  updateButtonState("running");
+  console.log("Resuming");
+});
+
+// EventListener fuers Zuruecksetzen des Algos
+resetBtn.addEventListener("click", () => {
+  appState.running = false;
+  appState.paused = false;
+  resetUI();
+  updateButtonState("idle");
+  console.log("Reset");
+});
+
 /**
  * Initialisiert das Woerterbuch
  *
@@ -197,61 +168,4 @@ function initializeWoerterbuch() {
   Woerterbuch["clear"] = 256;
   Woerterbuch["end"] = 257;
   return Woerterbuch;
-}
-
-/**
- * Fügt eine neue Zeile in die Tabelle hinzu
- * Ist aufgerufen in runLZW
- *
- * @param {String} code
- * @param {String} pattern
- */
-function addDictRowToUI(code, pattern) {
-  const row =
-    '<tr class="new-row"><td>' + code + "</td><td>" + pattern + "</td></tr>";
-  const dictBody = document.getElementById("dict-body");
-  const tableWrapper = document.querySelector(".table-wrapper");
-
-  dictBody.insertAdjacentHTML("beforeend", row);
-  if (tableWrapper) {
-    tableWrapper.scrollTop = tableWrapper.scrollHeight;
-  }
-}
-
-/**
- * Fügt einen neuen Output-Chip im UI hinzu
- * Ist aufgerufen in runLZW
- *
- * @param {*} code
- * @param {*} symbol
- */
-function addOutputToUI(code, symbol) {
-  const chip = document.createElement("div");
-  chip.classList.add("output-chip");
-  chip.innerText = symbol;
-
-  if (code == 256 || code == 257) {
-    chip.classList.add("chip-control");
-    if (code == 256) chip.innerText = "CLEAR";
-    if (code == 257) chip.innerText = "END";
-  } else if (code > 257) {
-    chip.classList.add("chip-compressed");
-  } else {
-    chip.classList.add("chip-single");
-  }
-
-  outputContainer.appendChild(chip);
-  if (outputContainer) {
-    outputContainer.scrollTop = outputContainer.scrollHeight;
-  }
-}
-
-/**
- * Description placeholder
- *
- * @param {*} x
- * @param {*} y
- */
-function updateHighlighterPosition(x, y) {
-  // TODO Implement highlighter position update
 }
