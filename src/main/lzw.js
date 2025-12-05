@@ -39,7 +39,7 @@ function transformImageDataToIndexStream(imageData) {
         console.warn(
           "Mehr als 256 Farben im Bild! GIF unterstützt nur 256 Farben."
         );
-        // TODO: Prozzes abbrechen und Warnung in der UI anzeigen
+        return null;
       }
     }
     indexStream.push(colorMap[colorKey]);
@@ -84,6 +84,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
 
     if (wk in Woerterbuch) {
       w = wk;
+      addProcessRowToUI(w, k, "-", "-", false);
     } else {
       let codeOutput = Woerterbuch[w];
       outputStream.push(codeOutput);
@@ -91,6 +92,10 @@ async function runLZW(indexStream, Woerterbuch, state) {
 
       Woerterbuch[wk] = nextCode;
       addDictRowToUI(nextCode, wk);
+
+      const newEntryDisplay = `${wk} (${nextCode})`;
+      addProcessRowToUI(w, k, newEntryDisplay, codeOutput, true);
+
       nextCode++;
 
       w = String(k);

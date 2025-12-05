@@ -18,7 +18,11 @@ const imageCanvas = document.getElementById("image-canvas");
 const pixelHighlighter = document.getElementById("pixel-highlighter");
 const ctx = imageCanvas.getContext("2d");
 const dictBody = document.getElementById("dict-body");
-const tableWrapper = document.querySelector(".table-wrapper");
+const processTable = document.getElementById("process-table");
+const processTableBody = document.getElementById("process-body");
+const tableWrapperLzwProcessTableWrapper = document.querySelector(
+  ".lzw-process-table-wrapper"
+);
 const indexStreamSection = document.getElementById("index-stream-section");
 const outputContainer = document.getElementById("output-container");
 /**
@@ -98,6 +102,11 @@ sourceImage.onload = () => {
 
   const imgData = ctx.getImageData(0, 0, sourceImage.width, sourceImage.height);
   const result = transformImageDataToIndexStream(imgData);
+  if (!result) {
+    alert(
+      "Das Bild hat zu viele Farben! Bitte ein Bild mit maximal 256 Farben hochladen!"
+    );
+  }
   indexStream = result.indexStream;
   globalColorPalette = result.colorPalette;
   addIndexStreamOutputToUI(indexStream, globalColorPalette);

@@ -11,7 +11,7 @@ function setWoerterbuchTabelle(Woerterbuch) {
     .join("");
 }
 /**
- * Fügt eine neue Zeile in die Tabelle hinzu
+ * Fügt eine neue Zeile in die Woerterbuch Tabelle hinzu
  * Ist aufgerufen in runLZW
  *
  * @param {String} code
@@ -27,6 +27,33 @@ function addDictRowToUI(code, pattern) {
   if (tableWrapper) {
     tableWrapper.scrollTop = tableWrapper.scrollHeight;
   }
+}
+/**
+ * Fügt eine neue Zeile in die Process Tabelle hinzu
+ * Ist aufgerufen in runLZW
+ *
+ * @param{String} w
+ * @param{String} k
+ * @param{String} newEntry
+ * @param{String} output
+ * @param{boolean} isNewEntry
+ */
+function addProcessRowToUI(w, k, newEntry, output, isNewEntry) {
+  const rowClass = isNewEntry ? "process-step-new" : "process-step-found";
+  const entryDisplay = isNewEntry ? newEntry : "-";
+  const outputDisplay = output
+    ? `<span class="chip-single">${output}</span>`
+    : "";
+  const rowHTML = `<tr class="new-row ${rowClass}">
+        <td>${w}</td>
+        <td>${k}</td>
+        <td>${entryDisplay}</td>
+        <td>${outputDisplay}</td>
+    </tr>`;
+
+  processTableBody.insertAdjacentHTML("beforeend", rowHTML);
+  tableWrapperLzwProcessTableWrapper.scrollTop =
+    tableWrapperLzwProcessTableWrapper.scrollHeight;
 }
 
 /**
@@ -132,6 +159,7 @@ function updateButtonState(state) {
 function resetUI() {
   outputContainer.innerHTML = "";
   const cleanDict = initializeWoerterbuch();
+  processTableBody.innerHTML = "";
   setWoerterbuchTabelle(cleanDict);
   const chips = document.querySelectorAll(".index-chip");
   chips.forEach((chip) => {

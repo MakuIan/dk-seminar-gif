@@ -77,7 +77,6 @@
         <div class="lower-panel">
           <section id="lzw-dict-section">
             <h2>LZW Wörterbuch</h2>
-            <!-- TODO Woerterbuch Tabelle -->
             <div class="table-wrapper">
               <table>
                 <thead>
@@ -90,11 +89,31 @@
               </table>
             </div>
           </section>
+          <section id="lzw-process-section">
+            <h2>LZW Prozess-Schritte</h2>
+            <div class="lzw-process-table-wrapper">
+              <div class="table-wrapper">
+              <table id="process-table">
+                <thead>
+                <tr>
+                  <th >letzter Index</th>
+                  <th> aktueller Index</th>
+                  <th>Neuer Eintrag</th>
+                  <th>Code Ausgabe</th>
+                </tr>
+                </thead>
+                <tbody id="process-body">
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </section>
           <section id="output-data-stream-section">
             <h2>Output Datenstrom</h2>
             <div id="output-container"></div>
           </section>
         </div>
+
       </div>
     </main>
     <script src="ui.js"></script>
