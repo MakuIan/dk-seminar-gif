@@ -59,10 +59,11 @@ function transformImageDataToIndexStream(imageData) {
 async function runLZW(indexStream, Woerterbuch, state) {
   let nextCode = 258;
   const outputStream = [];
+  let w = String(indexStream[0]);
+
   addOutputToUI(Woerterbuch["clear"], "CLEAR CODE");
   updateIndexStreamHighlight(0);
-
-  let w = String(indexStream[0]);
+  addProcessRowToUI("-", w, "-", "-", false);
 
   // TODO Update highlighter
   // updateHighlighterPosition(0, 0)
@@ -83,8 +84,8 @@ async function runLZW(indexStream, Woerterbuch, state) {
     const wk = w + " " + k;
 
     if (wk in Woerterbuch) {
-      w = wk;
       addProcessRowToUI(w, k, "-", "-", false);
+      w = wk;
     } else {
       let codeOutput = Woerterbuch[w];
       outputStream.push(codeOutput);
@@ -94,7 +95,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
       addDictRowToUI(nextCode, wk);
 
       const newEntryDisplay = `${wk} (${nextCode})`;
-      addProcessRowToUI(w, k, newEntryDisplay, codeOutput, true);
+      addProcessRowToUI(w, k, newEntryDisplay, w, true);
 
       nextCode++;
 
