@@ -6,7 +6,10 @@
 function setWoerterbuchTabelle(Woerterbuch) {
   dictBody.innerHTML = Object.entries(Woerterbuch)
     .map(([key, value]) => {
-      return `<tr><td>${key}</td><td>${value}</td></tr>`;
+      if (key === "clear") return `<tr><td>CLEAR</td><td>${value}</td></tr>`; // ÄNDERUNG
+      if (key === "end")   return `<tr><td>END</td><td>${value}</td></tr>`;   // ÄNDERUNG
+      // Standardfälle: Sequenz links, Code rechts
+      return `<tr><td>${value}</td><td>${key}</td></tr>`; // ÄNDERUNG (vorher war key links, value rechts)
     })
     .join("");
 }
@@ -18,8 +21,12 @@ function setWoerterbuchTabelle(Woerterbuch) {
  * @param {String} pattern
  */
 function addDictRowToUI(code, pattern) {
+  // ÄNDERUNG: Sonderfälle CLEAR/END prüfen
+  if (pattern === 256) pattern = "CLEAR"; // ÄNDERUNG
+  if (pattern === 257) pattern = "END";   // ÄNDERUNG
+
   const row =
-    '<tr class="new-row"><td>' + code + "</td><td>" + pattern + "</td></tr>";
+    '<tr class="new-row"><td>' + pattern + "</td><td>" + code + "</td></tr>"; // ÄNDERUNG (vorher war code links, pattern rechts)
   const dictBody = document.getElementById("dict-body");
   const tableWrapper = document.querySelector(".table-wrapper");
 
@@ -68,14 +75,19 @@ function addOutputToUI(code, symbol) {
   chip.classList.add("output-chip");
   chip.innerText = symbol;
 
-  if (code == 256 || code == 257) {
+  // ÄNDERUNG: Wir geben nur noch den Code aus, nicht die Sequenz
+  if (code == 256) {
     chip.classList.add("chip-control");
-    if (code == 256) chip.innerText = "CLEAR";
-    if (code == 257) chip.innerText = "END";
+    chip.innerText = "CLEAR"; // ÄNDERUNG
+  } else if (code == 257) {
+    chip.classList.add("chip-control");
+    chip.innerText = "END";   // ÄNDERUNG
   } else if (code > 257) {
     chip.classList.add("chip-compressed");
+    chip.innerText = code;    // ÄNDERUNG
   } else {
     chip.classList.add("chip-single");
+    chip.innerText = code;    // ÄNDERUNG
   }
 
   outputContainer.appendChild(chip);
