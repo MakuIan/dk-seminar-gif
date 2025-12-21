@@ -65,9 +65,6 @@ async function runLZW(indexStream, Woerterbuch, state) {
   updateIndexStreamHighlight(0);
   addProcessRowToUI("-", w, "-", "-", false);
 
-  // TODO Update highlighter
-  // updateHighlighterPosition(0, 0)
-
   for (let i = 1; i < indexStream.length; i++) {
     if (!state.running) {
       console.log("Process aborted by user.");
@@ -113,4 +110,8 @@ async function runLZW(indexStream, Woerterbuch, state) {
   addOutputToUI(Woerterbuch["end"], "END CODE");
 
   console.log("Final Output Stream:", outputStream);
+
+  window.latestOutputStream = outputStream;
+
+  return outputStream;
 }

@@ -7,7 +7,7 @@ function setWoerterbuchTabelle(Woerterbuch) {
   dictBody.innerHTML = Object.entries(Woerterbuch)
     .map(([key, value]) => {
       if (key === "clear") return `<tr><td>CLEAR</td><td>${value}</td></tr>`; // ÄNDERUNG
-      if (key === "end")   return `<tr><td>END</td><td>${value}</td></tr>`;   // ÄNDERUNG
+      if (key === "end") return `<tr><td>END</td><td>${value}</td></tr>`; // ÄNDERUNG
       // Standardfälle: Sequenz links, Code rechts
       return `<tr><td>${value}</td><td>${key}</td></tr>`; // ÄNDERUNG (vorher war key links, value rechts)
     })
@@ -23,7 +23,7 @@ function setWoerterbuchTabelle(Woerterbuch) {
 function addDictRowToUI(code, pattern) {
   // ÄNDERUNG: Sonderfälle CLEAR/END prüfen
   if (pattern === 256) pattern = "CLEAR"; // ÄNDERUNG
-  if (pattern === 257) pattern = "END";   // ÄNDERUNG
+  if (pattern === 257) pattern = "END"; // ÄNDERUNG
 
   const row =
     '<tr class="new-row"><td>' + pattern + "</td><td>" + code + "</td></tr>"; // ÄNDERUNG (vorher war code links, pattern rechts)
@@ -81,13 +81,13 @@ function addOutputToUI(code, symbol) {
     chip.innerText = "CLEAR"; // ÄNDERUNG
   } else if (code == 257) {
     chip.classList.add("chip-control");
-    chip.innerText = "END";   // ÄNDERUNG
+    chip.innerText = "END"; // ÄNDERUNG
   } else if (code > 257) {
     chip.classList.add("chip-compressed");
-    chip.innerText = code;    // ÄNDERUNG
+    chip.innerText = code; // ÄNDERUNG
   } else {
     chip.classList.add("chip-single");
-    chip.innerText = code;    // ÄNDERUNG
+    chip.innerText = code; // ÄNDERUNG
   }
 
   outputContainer.appendChild(chip);
@@ -181,11 +181,69 @@ function resetUI() {
 }
 
 /**
- * Description placeholder
+ * Adds a downloadBtn to the UI after the LZW algorithm finishes
  *
- * @param {*} x
- * @param {*} y
+ * @param {Blob} gifBlob
  */
-function updateHighlighterPosition(x, y) {
-  // TODO Implement highlighter position update
+function addDownloadBtnToUI(gifBlob) {
+  if (!resultsSection) return;
+  const url = URL.createObjectURL(gifBlob);
+  const downloadBtn = document.createElement("a");
+  downloadBtn.href = url;
+  downloadBtn.download = "output.gif";
+  downloadBtn.textContent = "Download GIF";
+  downloadBtn.className = "contrast"; //pico css style
+  downloadBtn.style.display = "block";
+  downloadBtn.style.marginTop = "15px";
+  downloadBtn.style.textAlign = "center";
+  downloadBtn.style.padding = "10px";
+  downloadBtn.style.fontWeight = "bold";
+  resultsSection.appendChild(downloadBtn);
+}
+
+/**
+ * Adds Compression Stats to UI
+ *
+ * @param {Number} originalSize
+ * @param {Number} compressedSize
+ */
+function addCompressionStatsToUI(originalSize, compressedSize) {
+  if (!resultsSection) return;
+  resultsSection.style.display = "block";
+
+  const saving = (1 - compressedSize / originalSize) * 100;
+
+  const originalSizeKB = (originalSize / 1024).toFixed(2);
+  const compressedSizeKB = (compressedSize / 1024).toFixed(2);
+  const savingsText = saving.toFixed(2);
+
+  const colorStyle = saving > 0 ? "color: #00ff8c;" : "color: #ff6b6b;";
+
+  const statsDiv = document.createElement("div");
+  statsDiv.id = "compression-stats-box";
+  statsDiv.style.padding = "10px";
+  statsDiv.style.backgroundColor = "var(--bg-panel)";
+
+  statsDiv.innerHTML = `
+      <h4 style="margin-bottom: 10px;">Kompressions-Statistik</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+        <div>Original:</div>
+        <div style="text-align: right;">${originalSizeKB} KB</div>
+        
+        <div>Komprimiert:</div>
+        <div style="text-align: right;">${compressedSizeKB} KB</div>
+      
+      </div>
+      <hr style="margin: 10px 0; border-color: var(--border-color-primary);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Platzersparnis:</span>
+        <span style="font-size: 1.2em; font-weight: bold; ${colorStyle}">
+          ${savingsText}%
+        </span>
+      </div>
+    `;
+
+  resultsSection.scrollIntoView({ behavior: "smooth" });
+  resultsSection.style.borderColor = "var(--chip-compressed-glow)";
+  resultsSection.appendChild(statsDiv);
 }

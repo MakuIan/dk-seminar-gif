@@ -25,6 +25,10 @@ const tableWrapperLzwProcessTableWrapper = document.querySelector(
 );
 const indexStreamSection = document.getElementById("index-stream-section");
 const outputContainer = document.getElementById("output-container");
+const outputDataStreamSection = document.getElementById(
+  "output-data-stream-section"
+);
+const resultsSection = document.getElementById("results-section");
 /**
  * ============================================================================
  * BUTTONS & STATE
@@ -59,6 +63,7 @@ let indexStream = null;
  * @type {*}
  */
 let globalColorPalette = null;
+let uploadFileSize = 0;
 
 // Initialisiere das Wörterbuch im UI
 setWoerterbuchTabelle(Woerterbuch);
@@ -72,6 +77,7 @@ imgInput.addEventListener("change", (event) => {
   }
 
   const file = event.target.files[0];
+  uploadFileSize = file.size;
 
   if (!file.type.startsWith("image/")) {
     console.log("Selected file is not an image.");
@@ -136,10 +142,30 @@ startBtn.addEventListener("click", async () => {
   console.log("Starting LZW with:", indexStream);
 
   // Now both variables are available
-  await runLZW(indexStream, Woerterbuch, appState);
+  const lzwResult = await runLZW(indexStream, Woerterbuch, appState);
   if (appState.running) {
     updateButtonState("finished");
     appState.running = false;
+  }
+
+  // Gif download
+
+  if (lzwResult && lzwResult.length > 0) {
+    const gifBlob = createGifBlob(
+      sourceImage.width,
+      sourceImage.height,
+      globalColorPalette,
+      lzwResult
+    );
+
+    const originalSize = uploadFileSize;
+    const compressedSize = gifBlob.size;
+
+    addCompressionStatsToUI(originalSize, compressedSize);
+
+    console.log("gifBlob", gifBlob);
+
+    addDownloadBtnToUI(gifBlob);
   }
 });
 

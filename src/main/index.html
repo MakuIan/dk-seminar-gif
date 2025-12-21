@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -63,7 +63,7 @@
           </div>
           <div id="image-container" class="canvas-wrapper">
             <!-- Hier werden die Bilder angezeigt -->
-            <img id="source-image" style="display: none;">
+            <img id="source-image" style="display: none" />
             <canvas id="image-canvas"></canvas>
             <!-- TODO Anzeige
              n, welcher Pixel gerade codiert wird -->
@@ -94,15 +94,14 @@
             <div class="lzw-process-table-wrapper">
               <table id="process-table">
                 <thead>
-                <tr>
-                  <th>letztes Wort</th>
-                  <th> aktuelles Wort</th>
-                  <th>Neuer Eintrag</th>
-                  <th>Code Ausgabe</th>
-                </tr>
+                  <tr>
+                    <th>letztes Wort</th>
+                    <th>aktuelles Wort</th>
+                    <th>Neuer Eintrag</th>
+                    <th>Code Ausgabe</th>
+                  </tr>
                 </thead>
-                <tbody id="process-body">
-                </tbody>
+                <tbody id="process-body"></tbody>
               </table>
             </div>
           </section>
@@ -110,12 +109,15 @@
             <h2>Output Datenstrom</h2>
             <div id="output-container"></div>
           </section>
+          <section id="results-section">
+            <h2>Ergebnis</h2>
+          </section>
         </div>
-
       </div>
     </main>
     <script src="ui.js"></script>
     <script src="main.js"></script>
     <script src="lzw.js"></script>
+    <script src="gifWriter.js"></script>
   </body>
 </html>

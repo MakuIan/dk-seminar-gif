@@ -1,266 +1,275 @@
 :root {
-    /* --- Farben --- */
-    --bg-panel: #181c25;
-    --bg-transparent: transparent;
-    --text-primary: #ffffff;
-    --border-color-primary: #2a3140;
+  /* --- Farben --- */
+  --bg-panel: #181c25;
+  --bg-transparent: transparent;
+  --text-primary: #ffffff;
+  --border-color-primary: #2a3140;
 
+  /* Output Chip Farben */
+  --chip-border-single: #2a3e40;
+  --chip-bg-compressed: #005f3d;
+  --chip-border-compressed: #484848;
+  --chip-compressed-glow: #00ff8c;
+  --chip-bg-control: #c53030;
+  --chip-shadow-compressed: 0 0 5px var(--chip-compressed-glow);
+  --chip-shadow-single: 0 4px 10px rgba(0, 30, 20, 0.6);
 
-    /* Output Chip Farben */
-    --chip-border-single: #2a3e40;
-    --chip-bg-compressed: #005f3d;
-    --chip-border-compressed: #484848;
-    --chip-compressed-glow: #00ff8c;
-    --chip-bg-control: #c53030;
-    --chip-shadow-compressed:0 0 5px var(--chip-compressed-glow);
-    --chip-shadow-single: 0 4px 10px rgba(0, 30, 20, 0.6);
+  /*Index Chip Farben*/
+  --chip-glow: var(--chip-compressed-glow);
+  --i-chip-text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  --i-chip-border: 1px solid rgba(255, 255, 255, 0.2);
 
-    /*Index Chip Farben*/
-    --chip-glow: var(--chip-compressed-glow);
-    --i-chip-text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-    --i-chip-border: 1px solid rgba(255, 255, 255, 0.2);
+  /* --- Spacing (Abstände) --- */
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 10px;
+  --space-lg: 15px;
+  --space-xl: 20px;
 
+  /* --- Layout & Borders --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --border-std: 1px solid var(--border-color-primary);
 
-    /* --- Spacing (Abstände) --- */
-    --space-xs: 4px;
-    --space-sm: 6px;
-    --space-md: 10px;
-    --space-lg: 15px;
-    --space-xl: 20px;
+  /* --- Animationen --- */
+  --anim-speed-fast: 0.2s;
+  --anim-speed-normal: 0.3s;
+  --anim-speed-slow: 0.6s;
 
-
-    /* --- Layout & Borders --- */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --border-std: 1px solid var(--border-color-primary);
-
-    /* --- Animationen --- */
-    --anim-speed-fast: 0.2s;
-    --anim-speed-normal: 0.3s;
-    --anim-speed-slow: 0.6s;
-
-    /* --- Typografie --- */
-    --font-mono: monospace;
+  /* --- Typografie --- */
+  --font-mono: monospace;
 }
 
 /* --- Layout --- */
 
 #intro-section {
-    border: var(--border-std);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
+  border: var(--border-std);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
 }
 
 .main-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100vh;
-    gap: var(--space-xl);
-    padding-bottom: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  gap: var(--space-xl);
+  padding-bottom: var(--space-xl);
 }
 
 #input-section {
-    flex: 1;
-    width: 100%;
-    border: var(--border-std);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    overflow-y: auto;
-    background-color: var(--bg-panel);
+  flex: 1;
+  width: 100%;
+  border: var(--border-std);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  overflow-y: auto;
+  background-color: var(--bg-panel);
 }
 
 .lower-panel {
-    display: grid;
-    flex:1;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr;
-    gap: var(--space-lg);
-    min-height: 0;
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-lg);
+  min-height: 0;
 }
 
 .lower-panel section {
-    background-color: var(--bg-panel);
-    border: var(--border-std);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    flex-grow: 1;
-    overflow: hidden;
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  flex-grow: 1;
+  overflow: hidden;
 }
 
-#lzw-dict-section,#lzw-process-section {
-    width: 100%;
-    height: auto;              /* ÄNDERUNG: flexibler als 100% */
-    min-height: 550px;         /* ÄNDERUNG: mehr Platz vertikal */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+#lzw-dict-section,
+#lzw-process-section {
+  width: 100%;
+  height: auto; /* ÄNDERUNG: flexibler als 100% */
+  min-height: 550px; /* ÄNDERUNG: mehr Platz vertikal */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 #output-data-stream-section {
-    grid-column: 1 / -1;
-    width: 100%;
-    height: auto;
-    min-height:150px;
+  grid-column: 1 / -1;
+  width: 100%;
+  height: auto;
+  min-height: 150px;
 }
 
 .table-wrapper,
 .lzw-process-table-wrapper {
-    flex: 1;
-    min-height: 0;
-    max-height: 550px;        /* ÄNDERUNG: mehr sichtbare Zeilen, scrollt danach */
-    overflow-y: auto;
-    border: var(--border-std);
+  flex: 1;
+  min-height: 0;
+  max-height: 550px; /* ÄNDERUNG: mehr sichtbare Zeilen, scrollt danach */
+  overflow-y: auto;
+  border: var(--border-std);
 }
 
 th {
-    position: sticky;
-    top: 0;
-    background-color: var(--bg-panel);
-    z-index: 1;
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-panel);
+  z-index: 1;
 }
 
 .new-row {
-    animation: slideInRow var(--anim-speed-slow) ease-out;
+  animation: slideInRow var(--anim-speed-slow) ease-out;
 }
 
 @keyframes slideInRow {
-    0% {
-        transform: translateX(-20px);
-        opacity: 0;
-    }
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-        background-color: var(--bg-transparent);
-    }
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+    background-color: var(--bg-transparent);
+  }
 }
 
-
-.process-step-found{
-    color: #aaa;
+.process-step-found {
+  color: #aaa;
 }
-.process-step-new{
-    background-color: rgba(0,255,140,0.1);
-    font-weight: bold;
+.process-step-new {
+  background-color: rgba(0, 255, 140, 0.1);
+  font-weight: bold;
 }
 
 .canvas-wrapper {
-    position: relative;
-    display: inline-block;
-    border: var(--border-std);
-    overflow: hidden;
+  position: relative;
+  display: inline-block;
+  border: var(--border-std);
+  overflow: hidden;
 }
 
 #image-canvas {
-    display: block;
-    image-rendering: pixelated;
+  display: block;
+  image-rendering: pixelated;
 }
 
 /* --- Output Chips Styling --- */
 
 #output-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: var(--space-sm);
-    padding: var(--space-md);
-    background-color: var(--bg-panel);
-    border-radius: var(--radius-sm);
-    overflow-y: auto;
-    flex-grow: 1;
-    height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background-color: var(--bg-panel);
+  border-radius: var(--radius-sm);
+  overflow-y: auto;
+  flex-grow: 1;
+  height: 100%;
 }
 
 .output-chip {
-    padding: var(--space-xs) 8px;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono), serif;
-    font-size: 0.9em;
-    color: var(--text-primary);
-    border: var(--border-std);
-    animation: popIn var(--anim-speed-normal) ease-out;
+  padding: var(--space-xs) 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono), serif;
+  font-size: 0.9em;
+  color: var(--text-primary);
+  border: var(--border-std);
+  animation: popIn var(--anim-speed-normal) ease-out;
 }
 
 .chip-single {
-    border: 1px solid var(--chip-border-single);
-    font-weight: bold;
-    box-shadow: var(--chip-shadow-single);
+  border: 1px solid var(--chip-border-single);
+  font-weight: bold;
+  box-shadow: var(--chip-shadow-single);
 }
 
 .chip-compressed {
-    /*background-color: var(--chip-bg-compressed);*/
-    border-color: var(--chip-border-compressed);
-    font-weight: bold;
-    box-shadow: var(--chip-shadow-compressed) ;
+  /*background-color: var(--chip-bg-compressed);*/
+  border-color: var(--chip-border-compressed);
+  font-weight: bold;
+  box-shadow: var(--chip-shadow-compressed);
 }
 
 .chip-control {
-    background-color: var(--chip-bg-control);
-    font-weight: bold;
+  background-color: var(--chip-bg-control);
+  font-weight: bold;
 }
 
 @keyframes popIn {
-    0% {
-        transform: scale(0);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* IndexStream Styling */
 
 #index-stream-section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-    padding: var(--space-md);
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: var(--bg-panel);
-    border: var(--border-std);
-    border-radius: var(--radius-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--radius-sm);
 }
 
 .index-chip {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-primary);
-    text-shadow: var(--i-chip-text-shadow);
-    border: var(--i-chip-border);
-    transition: all var(--anim-speed-fast) ease;
-    opacity: 0.6;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-shadow: var(--i-chip-text-shadow);
+  border: var(--i-chip-border);
+  transition: all var(--anim-speed-fast) ease;
+  opacity: 0.6;
 }
 
 .index-chip.pending {
-    opacity: 2;
+  opacity: 2;
 }
 
 .index-chip.active {
-    transform: scale(1.3);
-    z-index: 10;
-    border: 2px solid var(--text-primary);
-    box-shadow: 0 0 10px var(--chip-glow);
-    opacity: 1;
+  transform: scale(1.3);
+  z-index: 10;
+  border: 2px solid var(--text-primary);
+  box-shadow: 0 0 10px var(--chip-glow);
+  opacity: 1;
 }
 
 .index-chip.processed {
-    opacity: 0.3;
-    transform: scale(0.9);
-    filter: grayscale(0.5);
+  opacity: 0.3;
+  transform: scale(0.9);
+  filter: grayscale(0.5);
 }
 
-#pixel-highlighter {
-    position: absolute;
-    width: 1px;
-    height: 1px;
+#output-data-stream-section {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+#results-section {
+  grid-column: 1 / -1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: visible !important;
+  height: auto !important;
+  gap: 10px;
 }
