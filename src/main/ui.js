@@ -1,4 +1,15 @@
 /**
+ * ============================================================================
+ * DATEI: ui.js
+ * ZWECK: Benutzeroberflächen-Komponenten für die LZW-Komprimierung
+ * ============================================================================
+ * BESCHREIBUNG:
+ * Enthält Funktionen zur Aktualisierung der Benutzeroberfläche, insbesondere
+ * die Darstellung des LZW-Wörterbuchs und der Statusinformationen.
+ * ============================================================================
+ */
+
+/**
  * Initialisiert die Woerterbuch Tabelle im UI
  *
  * @param {Objekt} Woerterbuch
@@ -186,6 +197,7 @@ function resetUI() {
  * @param {Blob} gifBlob
  */
 function addDownloadBtnToUI(gifBlob) {
+  const resultsSection = document.getElementById("results-section");
   if (!resultsSection) return;
   const url = URL.createObjectURL(gifBlob);
   const downloadBtn = document.createElement("a");
@@ -208,6 +220,7 @@ function addDownloadBtnToUI(gifBlob) {
  * @param {Number} compressedSize
  */
 function addCompressionStatsToUI(originalSize, compressedSize) {
+  const resultsSection = document.getElementById("results-section");
   if (!resultsSection) return;
   resultsSection.style.display = "block";
 

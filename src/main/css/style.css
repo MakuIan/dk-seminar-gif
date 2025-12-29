@@ -25,6 +25,34 @@
   --space-md: 10px;
   --space-lg: 15px;
   --space-xl: 20px;
+  --space-xxl: 30px;
+
+  /* Neue Farbvariablen */
+  --chip-single-border: 1px solid #444;
+  --chip-single-bg: rgba(255, 255, 255, 0.05);
+  --index-chip-size: 30px;
+  --index-chip-active-scale: 1.3;
+  --index-chip-active-glow: 0 0 10px var(--chip-glow);
+  --index-chip-processed-opacity: 0.3;
+  --index-chip-scale: 0.9;
+  --index-chip-grayscale: grayscale(0.5);
+
+  /* Neue Animationen */
+  --anim-scale: transform 0.3s ease, opacity 0.3s ease;
+
+  /* Neue Schatten */
+  --header-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+
+  /* Neue Z-Index Werte */
+  --zindex-sticky: 10;
+  --zindex-header: 1000;
+
+  /* Neue Border-Radien */
+  --border-radius-card: 8px;
+
+  /* Neue Opacity-Werte */
+  --opacity-inactive: 0.6;
+  --opacity-active: 1;
 
   /* --- Layout & Borders --- */
   --radius-sm: 4px;
@@ -42,6 +70,16 @@
 
 /* --- Layout --- */
 
+header {
+  position: sticky;
+  top: 0;
+  z-index: var(--zindex-header);
+  width: 100%;
+  box-shadow: var(--header-shadow);
+  border-bottom: var(--border-std);
+  background-color: var(--bg-panel);
+}
+
 #intro-section {
   border: var(--border-std);
   border-radius: var(--radius-md);
@@ -52,7 +90,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
   gap: var(--space-xl);
   padding-bottom: var(--space-xl);
 }
@@ -69,37 +109,47 @@
 
 .lower-panel {
   display: grid;
-  flex: 1;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto;
   gap: var(--space-lg);
-  min-height: 0;
+  min-height: auto;
+  margin-bottom: var(--space-lg);
 }
 
-.lower-panel section {
+.lower-panel section,
+#output-data-stream-section,
+#bit-packing-section,
+#results-section {
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--radius-md);
   padding: var(--space-md);
-  flex-grow: 1;
   overflow: hidden;
+  width: 100%;
 }
 
 #lzw-dict-section,
 #lzw-process-section {
   width: 100%;
-  height: auto; /* ÄNDERUNG: flexibler als 100% */
-  min-height: 550px; /* ÄNDERUNG: mehr Platz vertikal */
+  height: 600px; /* ÄNDERUNG: flexibler als 100% */
+  /* min-height: 550px; /* ÄNDERUNG: mehr Platz vertikal */
+  /* max-height: 600px; */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 #output-data-stream-section {
-  grid-column: 1 / -1;
-  width: 100%;
   height: auto;
-  min-height: 150px;
+  overflow: visible;
+  margin-bottom: var(--space-lg);
+}
+#results-section {
+  display: block;
+  height: auto !important;
+  min-height: 100px;
+  overflow: visible !important;
+  margin-top: 10px;
+  border-color: var(--chip-compressed-glow);
 }
 
 .table-wrapper,
@@ -180,13 +230,14 @@ th {
 }
 
 .chip-single {
-  border: 1px solid var(--chip-border-single);
+  border: var(--chip-single-border);
   font-weight: bold;
   box-shadow: var(--chip-shadow-single);
+  background-color: var(--chip-single-bg);
+  transition: all var(--anim-speed-normal) ease;
 }
 
 .chip-compressed {
-  /*background-color: var(--chip-bg-compressed);*/
   border-color: var(--chip-border-compressed);
   font-weight: bold;
   box-shadow: var(--chip-shadow-compressed);
@@ -223,8 +274,8 @@ th {
 }
 
 .index-chip {
-  width: 30px;
-  height: 30px;
+  width: var(--index-chip-size);
+  height: var(--index-chip-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,8 +285,8 @@ th {
   color: var(--text-primary);
   text-shadow: var(--i-chip-text-shadow);
   border: var(--i-chip-border);
-  transition: all var(--anim-speed-fast) ease;
-  opacity: 0.6;
+  transition: var(--anim-scale);
+  opacity: var(--opacity-inactive);
 }
 
 .index-chip.pending {
@@ -243,33 +294,201 @@ th {
 }
 
 .index-chip.active {
-  transform: scale(1.3);
-  z-index: 10;
+  transform: scale(var(--index-chip-active-scale));
+  z-index: var(--zindex-sticky);
   border: 2px solid var(--text-primary);
-  box-shadow: 0 0 10px var(--chip-glow);
-  opacity: 1;
+  box-shadow: var(--index-chip-active-glow);
+  opacity: var(--opacity-active);
 }
 
 .index-chip.processed {
-  opacity: 0.3;
-  transform: scale(0.9);
-  filter: grayscale(0.5);
+  opacity: var(--index-chip-processed-opacity);
+  transform: scale(var(--index-chip-scale));
+  filter: var(--index-chip-grayscale);
 }
 
-#output-data-stream-section {
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-}
+/* --- Neues Vertikales Layout --- */
 
-#results-section {
-  grid-column: 1 / -1;
-  width: 100%;
+.packing-vertical-wrapper {
   display: flex;
   flex-direction: column;
-  overflow: visible !important;
-  height: auto !important;
-  gap: 10px;
+  gap: var(--space-xl);
+  background: var(--bg-panel);
+  padding: var(--space-xl);
+  border: var(--border-std);
+  border-radius: var(--border-radius-card);
+  align-items: center;
+
+  /* --- Oben: Input --- */
+  .input-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    text-align: center;
+    min-width: 300px;
+  }
+
+  .value-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 1.2em;
+  }
+
+  .big-num {
+    font-weight: bold;
+    color: #fff;
+  }
+  .mono-code {
+    font-family: monospace;
+    color: var(--chip-compressed-glow);
+  }
+  .meta {
+    font-size: 0.8em;
+    color: #888;
+  }
+
+  .arrow-down-icon {
+    font-size: 1.5em;
+    color: #555;
+    margin: 5px 0;
+    text-align: center;
+  }
+
+  /* --- Mitte: Buffer (Das Herzstück) --- */
+  .middle-row {
+    width: 100%;
+    text-align: center;
+  }
+
+  .visual-track-wrapper {
+    position: relative;
+    background: #0f1115;
+    border: 1px solid #333;
+    border-radius: 6px;
+    height: 90px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    padding-right: 20px;
+  }
+  .visual-track-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+  .visual-track-wrapper::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 4px;
+  }
+  .visual-track-wrapper::-webkit-scrollbar-track {
+    background-color: #0f1115;
+    border-radius: 0 0 6px 6px;
+  }
+  .visual-track-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
+  .track-scroll-content {
+    position: relative;
+    width: max-content;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .bit-track {
+    display: flex;
+    gap: 2px;
+    transition: transform 0.3s ease;
+    width: max-content;
+    min-width: 100%;
+    align-items: center;
+    height: 100%;
+    padding-left: 10px;
+  }
+
+  /* Die Cut-Lini*/
+  .cut-marker {
+    position: absolute;
+    left: calc(18px + (32px * 8));
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ff4757;
+    z-index: 0;
+    opacity: 0.5;
+    box-shadow: 0 0 10px #ff4757;
+    pointer-events: none;
+  }
+
+  .bit-block {
+    width: 30px;
+    height: 40px;
+    z-index: 1;
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-size: 1.2em;
+    padding-bottom: 10px;
+  }
+
+  .bit-idx {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.5em;
+    color: #aaa;
+    opacity: 0.7;
+    font-weight: normal;
+  }
+
+  /* --- Unten: Output Area --- */
+  .bottom-row {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .byte-collection-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px inset #333;
+    border-radius: 6px;
+    padding: 15px;
+    width: 100%;
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  /* Animation für das Rausfallen nach UNTEN */
+  .bit-fly-down {
+    animation: flyDown 0.6s forwards ease-in;
+    background: #c53030 !important;
+    border-color: #ff4757 !important;
+  }
+
+  @keyframes flyDown {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(60px) scale(0.5);
+      opacity: 0;
+    }
+  }
 }

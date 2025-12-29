@@ -143,29 +143,27 @@ startBtn.addEventListener("click", async () => {
 
   // Now both variables are available
   const lzwResult = await runLZW(indexStream, Woerterbuch, appState);
-  if (appState.running) {
-    updateButtonState("finished");
-    appState.running = false;
-  }
 
   // Gif download
+  if (appState.running) {
+    if (lzwResult && lzwResult.length > 0) {
+      console.log("LZW fertig, erstelle GIF...");
+      const gifBlob = createGifBlob(
+        sourceImage.width,
+        sourceImage.height,
+        globalColorPalette,
+        lzwResult
+      );
 
-  if (lzwResult && lzwResult.length > 0) {
-    const gifBlob = createGifBlob(
-      sourceImage.width,
-      sourceImage.height,
-      globalColorPalette,
-      lzwResult
-    );
+      const originalSize = uploadFileSize;
+      const compressedSize = gifBlob.size;
 
-    const originalSize = uploadFileSize;
-    const compressedSize = gifBlob.size;
-
-    addCompressionStatsToUI(originalSize, compressedSize);
-
-    console.log("gifBlob", gifBlob);
-
-    addDownloadBtnToUI(gifBlob);
+      addCompressionStatsToUI(originalSize, compressedSize);
+      addDownloadBtnToUI(gifBlob);
+      console.log("gifBlob created:", gifBlob.size, "bytes");
+    }
+    updateButtonState("finished");
+    appState.running = false;
   }
 });
 

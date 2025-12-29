@@ -19,7 +19,7 @@
 function createGifBlob(width, height, palette, lzwCodes) {
   const byteBuilder = [];
 
-  console.group("Byte-Schreibfunktionen:");
+  console.groupCollapsed("Byte-Schreibfunktionen Debugging");
   // 0xff Bitmaske: Behält nur die unteren 8 Bits (ein Byte) und schneidet alles darüber ab.
   const writeByte = (value) => {
     byteBuilder.push(value & 0xff);
@@ -36,6 +36,8 @@ function createGifBlob(width, height, palette, lzwCodes) {
       writeByte(str.charCodeAt(i));
     }
   };
+
+  console.groupEnd();
 
   // Header
   writeString("GIF89a");
@@ -163,6 +165,7 @@ function packLZWCodes(lzwCodes, minCodeSize) {
         nextBump = 1 << currentCodeSize;
       }
     }
+    console.groupEnd();
   }
   //Restbytes
   if (bitCount > 0) {
@@ -171,6 +174,15 @@ function packLZWCodes(lzwCodes, minCodeSize) {
     );
     bytes.push(bitAccumulator & 0xff);
   }
+  const hexOutput = bytes.map(
+    (b) => "0x" + b.toString(16).toUpperCase().padStart(2, "0")
+  );
+  console.log(
+    "%c=== ECHTER BINÄR OUTPUT (gifWriter.js) ===",
+    "color: lime; font-weight: bold; font-size: 1.2em;"
+  );
+  console.log(hexOutput.join(" "));
+  console.log("Anzahl Bytes:", bytes.length);
   console.log("%c=== END PACKING ===", "color: lime;");
   console.log(bytes);
   return bytes;
