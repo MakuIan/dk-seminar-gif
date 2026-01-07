@@ -107,54 +107,11 @@
           <h2>Output Datenstrom</h2>
           <div id="output-container"></div>
         </section>
-        <section id="bit-packing-section">
-          <h2>Bit-Packing (Variable Länge zu 8-Bit Bytes)</h2>
-
-          <div class="packing-vertical-wrapper">
-            <div class="pack-row top-row">
-              <div class="input-card">
-                <div class="label">Input (LZW)</div>
-                <div class="value-group">
-                  <span id="bp-val-dec" class="big-num">-</span>
-                  <span id="bp-val-bin" class="mono-code">-</span>
-                  <span class="meta"
-                    >(<span id="bp-val-width">-</span> Bits)</span
-                  >
-                </div>
-              </div>
-              <div class="arrow-down-icon">⬇</div>
-            </div>
-
-            <div class="pack-row middle-row">
-              <h4>Akkumulator (Buffer)</h4>
-              <p class="hint-text">
-                Bits warten hier. Bei 8 Bits wird geschnitten.
-              </p>
-
-              <div class="visual-track-wrapper">
-                <div class="track-scroll-content"></div>
-                <div class="cut-marker"></div>
-                <div id="bp-accumulator" class="bit-track"></div>
-              </div>
-
-              <div class="buffer-stats">
-                Wartende Bits: <strong id="bp-buffer-count">0</strong>
-              </div>
-            </div>
-
-            <div class="pack-row bottom-row">
-              <div class="arrow-down-icon">⬇ BYTE CUT</div>
-              <h4>Output Stream (Fertige Bytes)</h4>
-              <div id="bp-byte-output" class="byte-collection-area"></div>
-            </div>
-          </div>
-        </section>
         <section id="results-section">
           <h2>Ergebnis</h2>
         </section>
       </div>
     </main>
-    <script src="bitVisualizer.js"></script>
     <script src="ui.js"></script>
     <script src="main.js"></script>
     <script src="lzw.js"></script>

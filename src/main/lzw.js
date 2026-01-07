@@ -61,13 +61,8 @@ async function runLZW(indexStream, Woerterbuch, state) {
   const outputStream = [];
   let w = String(indexStream[0]);
 
-  if (typeof window.bitPackerViz !== "undefined") window.bitPackerViz.reset();
-
   outputStream.push(Woerterbuch["clear"]);
   addOutputToUI(Woerterbuch["clear"], "CLEAR CODE");
-
-  if (typeof window.bitPackerViz !== "undefined")
-    window.bitPackerViz.processCode(Woerterbuch["clear"]);
 
   updateIndexStreamHighlight(0);
   addProcessRowToUI("-", w, "-", "-", false);
@@ -95,10 +90,6 @@ async function runLZW(indexStream, Woerterbuch, state) {
       outputStream.push(codeOutput);
       addOutputToUI(codeOutput, w);
 
-      if (typeof window.bitPackerViz !== "undefined") {
-        window.bitPackerViz.processCode(codeOutput);
-      }
-
       Woerterbuch[wk] = nextCode;
       addDictRowToUI(nextCode, wk);
 
@@ -111,8 +102,6 @@ async function runLZW(indexStream, Woerterbuch, state) {
       if (nextCode >= 4096) {
         outputStream.push(Woerterbuch["clear"]);
         addOutputToUI(Woerterbuch["clear"], "CLEAR CODE");
-        if (typeof window.bitPackerViz !== "undefined")
-          window.bitPackerViz.processCode(Woerterbuch["clear"]);
         for (const key in Woerterbuch) delete Woerterbuch[key];
         const tempDict = initializeWoerterbuch();
         Object.assign(Woerterbuch, tempDict);
@@ -127,18 +116,10 @@ async function runLZW(indexStream, Woerterbuch, state) {
     let codeOutput = Woerterbuch[w];
     outputStream.push(codeOutput);
     addOutputToUI(codeOutput, w);
-
-    if (typeof window.bitPackerViz !== "undefined")
-      window.bitPackerViz.processCode(codeOutput);
   }
 
   outputStream.push(Woerterbuch["end"]);
   addOutputToUI(Woerterbuch["end"], "END CODE");
-
-  if (typeof window.bitPackerViz !== "undefined") {
-    window.bitPackerViz.processCode(Woerterbuch["end"]);
-    window.bitPackerViz.flush();
-  }
 
   console.log("Final Output Stream:", outputStream);
 
