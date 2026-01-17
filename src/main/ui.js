@@ -127,6 +127,34 @@ const addIndexStreamOutputToUI = function (indexStream, colorPalette) {
   indexStreamSection.innerHTML = innerHTML;
 };
 
+// === NEU: DECODER UI ===
+
+/**
+ * Initialisiert die Woerterbuch-Tabelle für den Decoder
+ */
+function setDecodeWoerterbuchTabelle(Woerterbuch) {
+  decodeDictBody.innerHTML = Object.entries(Woerterbuch)
+    .map(([key, value]) => {
+      if (key === "clear") return `<tr><td>CLEAR</td><td>${value}</td></tr>`;
+      if (key === "end") return `<tr><td>END</td><td>${value}</td></tr>`;
+      return `<tr><td>${value}</td><td>${key}</td></tr>`;
+    })
+    .join("");
+}
+
+/**
+ * Fügt den Input-Stream für den Decoder zur UI hinzu
+ */
+function addDecodeInputStreamToUI(stream) {
+  if (!stream || stream.length === 0) return;
+  decodeInputStreamSection.innerHTML = stream
+    .map(
+      (code) =>
+        `<div class="index-chip decode-chip">${code}</div>`
+    )
+    .join("");
+}
+
 /**
  * Aktualisiert die Index Chips wahrend des LZW Algorithmus
  *

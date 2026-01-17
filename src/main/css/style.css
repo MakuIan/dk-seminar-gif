@@ -306,3 +306,46 @@ th {
   transform: scale(var(--index-chip-scale));
   filter: var(--index-chip-grayscale);
 }
+
+#decode-canvas {
+  display: block;
+  image-rendering: pixelated;
+  border: var(--border-std);
+}
+
+#decode-output-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+#decode-input-stream {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--radius-sm);
+}
+
+.decode-chip {
+  min-width: var(--index-chip-size); /* mindestens wie bisher */
+  width: auto; /* wächst mit der Zahl */
+  height: var(--index-chip-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-shadow: var(--i-chip-text-shadow);
+  border: var(--i-chip-border);
+  transition: var(--anim-scale);
+  opacity: var(--opacity-inactive);
+  padding: 0 var(--space-xs); /* horizontal etwas Abstand für lange Zahlen */
+}

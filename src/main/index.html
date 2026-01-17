@@ -45,7 +45,7 @@
         <p>
           Willkommen zum GIF Compression Visualizer! Diese Anwendung ermöglicht
           es Ihnen, den Prozess der GIF-Kompression zu verstehen, indem es den
-          LZW Algorithmus auf ein ausgewähltes Bild anwenden und visuell
+          LZW Algorithmus auf ein ausgewähltes Bild anwendet und visuell
           darstellt.
         </p>
       </article>
@@ -110,6 +110,87 @@
         <section id="results-section">
           <h2>Ergebnis</h2>
         </section>
+        <!-- ================= DEKODIERUNG ================= -->
+
+        <!-- Button zum Einblenden des Dekodierers -->
+        <section id="decode-control-section">
+          <button id="show-decode-btn" disabled>
+            Dekodierung anzeigen
+          </button>
+        </section>
+
+        <!-- Dekodier-Container (initial versteckt) -->
+        <div id="decode-container" style="display: none">
+
+          <!-- INPUT -->
+          <section id="decode-input-section">
+            <h2>Input (Code-Sequenz)</h2>
+
+            <!-- Code-Stream aus dem Encoder -->
+            <div id="decode-input-stream"></div>
+
+            <!-- Start-Button: bewusst direkt hier -->
+            <button id="start-decode-btn">
+              Dekodierung starten
+            </button>
+          </section>
+
+          <!-- Wörterbuch + Prozess (analog zu lower-panel beim Encoder) -->
+          <div class="lower-panel">
+
+            <!-- Wörterbuch -->
+            <section id="decode-dict-section">
+              <h2>LZW Wörterbuch</h2>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Sequenz</th>
+                    </tr>
+                  </thead>
+                  <tbody id="decode-dict-body">
+                    <!-- initiale 0–257 Einträge via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- Prozess-Schritte -->
+            <section id="decode-process-section">
+              <h2>LZW Prozess-Schritte</h2>
+              <div class="lzw-process-table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>I (letzter)</th>
+                      <th>J (aktuell)</th>
+                      <th>Neuer Eintrag</th>
+                      <th>Output</th>
+                    </tr>
+                  </thead>
+                  <tbody id="decode-process-body">
+                    <!-- wird schrittweise gefüllt -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+          </div>
+
+          <!-- OUTPUT STREAM -->
+          <section id="decode-output-data-stream-section">
+            <h2>Output Datenstrom (rekonstruiert)</h2>
+            <div id="decode-output-container"></div>
+          </section>
+
+          <!-- ERGEBNIS -->
+          <section id="decode-results-section">
+            <h2>Rekonstruiertes Bild</h2>
+            <canvas id="decode-canvas"></canvas>
+          </section>
+
+        </div>
       </div>
     </main>
     <script src="ui.js"></script>

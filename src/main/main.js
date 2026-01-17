@@ -29,6 +29,14 @@ const outputDataStreamSection = document.getElementById(
   "output-data-stream-section"
 );
 const resultsSection = document.getElementById("results-section");
+
+// Decoder Elemente
+const decodeContainer = document.getElementById("decode-container"); // Container für Decoder
+const showDecodeBtn = document.getElementById("show-decode-btn"); // Button zum Anzeigen des Decoders
+const startDecodeBtn = document.getElementById("start-decode-btn"); // Button zum Starten der Dekodierung
+const decodeInputStreamSection = document.getElementById("decode-input-stream"); // === NEU ===
+const decodeDictBody = document.getElementById("decode-dict-body"); // === NEU ===
+
 /**
  * ============================================================================
  * BUTTONS & STATE
@@ -44,12 +52,17 @@ const appState = {
   paused: false
 };
 
+// Initiale Sichtbarkeit und Button-States
+decodeContainer.style.display = "none"; // Decoder Container versteckt
+showDecodeBtn.disabled = true; // Button erst nach Encoding aktivieren
+startDecodeBtn.disabled = false; // bleibt aktiv, sobald Container sichtbar
+
+let encodedOutputStream = null; // === NEU ===
 /**
  * Woerterbuch für LZW
  *
  * @type {{}}
  */
-
 const Woerterbuch = initializeWoerterbuch();
 /**
  * Index Stream des geladenen Bildes von transformImageDataToIndexStream
@@ -124,14 +137,24 @@ sourceImage.onload = () => {
 // EventListener fuers Starten des Algos
 startBtn.addEventListener("click", async () => {
   if (appState.running) return;
-
-  outputContainer.innerHTML = "";
+  
   // Security Check: Has an image been loaded?
   if (!indexStream || indexStream.length === 0) {
     alert("Bitte zuerst ein Bild laden!");
     console.error("IndexStream is empty or undefined");
     return;
   }
+
+  // Sperre Start-Button und Bild-Upload während der Demo
+  startBtn.disabled = true;
+  imgInput.disabled = true;
+
+  outputContainer.innerHTML = "";
+  processTableBody.innerHTML = ""; // Tabelle Prozess löschen
+  dictBody.innerHTML = "";         // Wörterbuch-Tabelle löschen
+  resultsSection.innerHTML = "";   // Kompressionsstatistik löschen
+
+
   const Woerterbuch = initializeWoerterbuch();
   setWoerterbuchTabelle(Woerterbuch);
 
@@ -143,6 +166,11 @@ startBtn.addEventListener("click", async () => {
 
   // Now both variables are available
   const lzwResult = await runLZW(indexStream, Woerterbuch, appState);
+
+  // === NEU: Decoder-Input ===
+  if (lzwResult && lzwResult.length > 0) {
+    encodedOutputStream = lzwResult;
+  }
 
   // Gif download
   if (appState.running) {
@@ -162,6 +190,10 @@ startBtn.addEventListener("click", async () => {
       addDownloadBtnToUI(gifBlob);
       console.log("gifBlob created:", gifBlob.size, "bytes");
     }
+
+    // Decoder Button aktivieren nach Encoding
+    showDecodeBtn.disabled = false;
+
     updateButtonState("finished");
     appState.running = false;
   }
@@ -188,7 +220,79 @@ resetBtn.addEventListener("click", () => {
   appState.paused = false;
   resetUI();
   updateButtonState("idle");
-  console.log("Reset");
+
+  // === NEU: Decoder komplett zurücksetzen ===
+  decodeContainer.style.display = "none"; // === NEU ===
+  showDecodeBtn.disabled = true; // === NEU ===
+  decodeInputStreamSection.innerHTML = ""; // === NEU ===
+  decodeDictBody.innerHTML = ""; // === NEU ===
+  encodedOutputStream = null; // === NEU ===
+
+  // Ergebnisse + Kompressionsstatistik löschen
+  outputContainer.innerHTML = "";
+  processTableBody.innerHTML = "";
+  resultsSection.innerHTML = "";
+
+  // === Wörterbuch auf Initialwerte zurücksetzen ===
+  const initialWoerterbuch = initializeWoerterbuch();
+  setWoerterbuchTabelle(initialWoerterbuch);
+
+  // === Bild und Canvas zurücksetzen ===
+  sourceImage.src = "";           
+  ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height); // Canvas komplett leeren
+  imageCanvas.width = 0;
+  imageCanvas.height = 0;
+
+  // === Input-Stream und Palette leeren ===
+  indexStream = null;
+  globalColorPalette = null;
+
+  // Index-Stream UI leeren
+  indexStreamSection.innerHTML = "";
+
+  // Bild-Upload wieder freigeben
+  imgInput.value = "";            // Input zurücksetzen
+  imgInput.disabled = false;      // Input wieder aktivieren
+
+  // Start-Button wieder freigeben
+  startBtn.disabled = false;
+});
+
+// Decoder Container öffnen
+showDecodeBtn.addEventListener("click", () => {
+  decodeContainer.style.display = "block";
+  decodeContainer.scrollIntoView({ behavior: "smooth" });
+  // === NEU: Decoder-Wörterbuch initialisieren ===
+  const decodeWoerterbuch = initializeWoerterbuch(); // === NEU ===
+  setDecodeWoerterbuchTabelle(decodeWoerterbuch); // === NEU ===
+
+  // === NEU: Decoder Input Stream anzeigen ===
+  addDecodeInputStreamToUI(encodedOutputStream); // === NEU ===
+});
+
+// Start-Button für Dekodierung (Platzhalter)
+startDecodeBtn.addEventListener("click", async () => {
+  if (!encodedOutputStream || encodedOutputStream.length === 0) {
+    alert("Keine kodierten Daten vorhanden! Zuerst encoden.");
+    return;
+  }
+
+  if (appState.decoding) return; // läuft bereits
+
+  const decodeWoerterbuch = initializeWoerterbuch();
+  setDecodeWoerterbuchTabelle(decodeWoerterbuch);
+  addDecodeInputStreamToUI(encodedOutputStream);
+
+  appState.decoding = true;
+  appState.paused = false;
+
+  await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState, {
+    onOutput: (value) => addDecodeOutputToUI(value),
+    onProcessRow: (I, J, newEntry, output) => addDecodeProcessRowToUI(I, J, newEntry, output),
+    onDictUpdate: (code, entry) => setDecodeWoerterbuchTabelle(decodeWoerterbuch)
+  });
+
+  appState.decoding = false;
 });
 
 /**

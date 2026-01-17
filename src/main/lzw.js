@@ -127,3 +127,54 @@ async function runLZW(indexStream, Woerterbuch, state) {
 
   return outputStream;
 }
+
+
+/**
+ * ============================================================================
+ * LZW Decoder
+ * ============================================================================
+ *
+ * @param {Array<number>} encodedStream
+ * @param {Object} Woerterbuch
+ * @param {Object} state {paused, decoding}
+ * @param {Object} callbacks {onOutput, onProcessRow, onDictUpdate}
+ */
+async function runLZWDecoder(encodedStream, Woerterbuch, state, callbacks = {}) {
+  let nextCode = Math.max(...Object.values(Woerterbuch)) + 1;
+
+  let I = Woerterbuch[encodedStream[0]];
+  let outputStream = [I];
+
+  if (callbacks.onOutput) callbacks.onOutput(I);
+  if (callbacks.onProcessRow) callbacks.onProcessRow(I, "-", "-", I);
+
+  for (let i = 1; i < encodedStream.length; i++) {
+    while (state.paused) await sleep(100);
+
+    if (!state.decoding) return;
+
+    const currentCode = encodedStream[i];
+    let J;
+
+    if (currentCode in Woerterbuch) {
+      J = Woerterbuch[currentCode];
+    } else {
+      J = I + I[0];
+    }
+
+    Woerterbuch[nextCode] = I + J[0];
+    const newEntry = `${I}+${J[0]} (${nextCode})`;
+    nextCode++;
+
+    outputStream.push(J);
+
+    if (callbacks.onProcessRow) callbacks.onProcessRow(I, J, newEntry, J);
+    if (callbacks.onOutput) callbacks.onOutput(J);
+    if (callbacks.onDictUpdate) callbacks.onDictUpdate(nextCode - 1, I + J[0]);
+
+    I = J;
+    await sleep(300);
+  }
+
+  return outputStream.join("");
+}
