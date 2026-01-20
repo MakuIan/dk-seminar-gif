@@ -288,3 +288,61 @@ function addCompressionStatsToUI(originalSize, compressedSize) {
   resultsSection.style.borderColor = "var(--chip-compressed-glow)";
   resultsSection.appendChild(statsDiv);
 }
+
+function highlightPseudocode(lineNumber) {
+    // Alle Zeilen entmarkieren
+    document.querySelectorAll('.pseudocode-line').forEach(el => {
+        el.classList.remove('active-line');
+    });
+    // Aktuelle Zeile markieren
+    const active = document.querySelector(`.pseudocode-line[data-line="${lineNumber}"]`);
+    if (active) active.classList.add('active-line');
+}
+
+function updateDecoderVars(c, i, j) {
+    document.getElementById('var-c').textContent = c;
+    document.getElementById('var-i').textContent = i;
+    document.getElementById('var-j').textContent = j;
+}
+
+function addDecodeOutputToUI(sequence) {
+    const container = document.getElementById('decode-output-container');
+    const codes = sequence.split(" ");
+    codes.forEach(code => {
+        const chip = document.createElement("div");
+        chip.classList.add("index-chip", "processed");
+        chip.innerText = code;
+        container.appendChild(chip);
+    });
+    container.scrollTop = container.scrollHeight;
+}
+
+function addDecodeDictRowToUI(code, pattern) {
+    const row = `<tr><td>${pattern}</td><td>${code}</td></tr>`;
+    const decodeDictBody = document.getElementById("decode-dict-body");
+    decodeDictBody.insertAdjacentHTML("beforeend", row);
+    decodeDictBody.closest('.table-wrapper').scrollTop = decodeDictBody.closest('.table-wrapper').scrollHeight;
+}
+
+function drawPixelsFromSequence(sequence, colorPalette) {
+    const canvas = document.getElementById('decode-canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    
+    // Die Sequenz ist z.B. "0 1 0"
+    const indices = sequence.split(" ").map(Number);
+    
+    indices.forEach(colorIdx => {
+        const colorRGB = colorPalette[colorIdx].split(",");
+        
+        // Berechne X und Y Koordinate basierend auf dem aktuellen Pixel-Index
+        const x = window.currentPixelIndex % width;
+        const y = Math.floor(window.currentPixelIndex / width);
+        
+        // Zeichne genau dieses eine Pixel (1x1 Quadrat)
+        ctx.fillStyle = `rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
+        ctx.fillRect(x, y, 1, 1);
+        
+        window.currentPixelIndex++;
+    });
+}

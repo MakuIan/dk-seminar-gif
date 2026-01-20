@@ -145,8 +145,8 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>Code</th>
                       <th>Sequenz</th>
+                      <th>Code</th>
                     </tr>
                   </thead>
                   <tbody id="decode-dict-body">
@@ -156,24 +156,60 @@
               </div>
             </section>
 
-            <!-- Prozess-Schritte -->
+            <!-- Variablen + Pseudocode -->
             <section id="decode-process-section">
-              <h2>LZW Prozess-Schritte</h2>
-              <div class="lzw-process-table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>I (letzter)</th>
-                      <th>J (aktuell)</th>
-                      <th>Neuer Eintrag</th>
-                      <th>Output</th>
-                    </tr>
-                  </thead>
-                  <tbody id="decode-process-body">
-                    <!-- wird schrittweise gefüllt -->
-                  </tbody>
-                </table>
+              <h2>Decoder</h2>
+
+              <!-- Variablenbereich oben -->
+              <div id="decode-vars-panel">
+                <div class="var-row">c = <span id="var-c">–</span></div>
+                <div class="var-row">I = <span id="var-i">–</span></div>
+                <div class="var-row">J = <span id="var-j">–</span></div>
               </div>
+
+              <!-- Pseudocodebereich darunter -->
+              <div id="decode-pseudocode-section">
+                <div class="pseudocode-line" data-line="1">
+                  c := Lies ersten Code aus dem Input-Stream
+                </div>
+                <div class="pseudocode-line" data-line="2">
+                  J := W[c]
+                </div>
+                <div class="pseudocode-line" data-line="3">
+                  Gib J aus
+                </div>
+                <div class="pseudocode-line" data-line="4">
+                  I := J
+                </div>
+                <div class="pseudocode-line" data-line="5">
+                  Solange noch Codes vorhanden:
+                </div>
+                <div class="pseudocode-line indent-1" data-line="6">
+                  c := Lies nächsten Code
+                </div>
+                <div class="pseudocode-line indent-1" data-line="7">
+                  Wenn c im Wörterbuch:
+                </div>
+                <div class="pseudocode-line indent-2" data-line="8">
+                  J := W[c]
+                </div>
+                <div class="pseudocode-line indent-1" data-line="9">
+                  Sonst:
+                </div>
+                <div class="pseudocode-line indent-2" data-line="10">
+                  J := I + I[0]
+                </div>
+                <div class="pseudocode-line indent-1" data-line="11">
+                  Füge (I + J[0]) ins Wörterbuch ein
+                </div>
+                <div class="pseudocode-line indent-1" data-line="12">
+                  Gib J aus
+                </div>
+                <div class="pseudocode-line indent-1" data-line="13">
+                  I := J
+                </div>
+              </div>
+              
             </section>
 
           </div>

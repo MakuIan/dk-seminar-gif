@@ -134,47 +134,89 @@ async function runLZW(indexStream, Woerterbuch, state) {
  * LZW Decoder
  * ============================================================================
  *
- * @param {Array<number>} encodedStream
- * @param {Object} Woerterbuch
- * @param {Object} state {paused, decoding}
- * @param {Object} callbacks {onOutput, onProcessRow, onDictUpdate}
  */
-async function runLZWDecoder(encodedStream, Woerterbuch, state, callbacks = {}) {
-  let nextCode = Math.max(...Object.values(Woerterbuch)) + 1;
+async function runLZWDecoder(inputStream, Woerterbuch, state) {
+    let nextCode = 258;
+    let decodedStream = [];
+    
+    // Hilfsfunktion für Pseudocode-Highlighting
+    const step = async (line) => {
+        highlightPseudocode(line);
+        await sleep(1000); // Zeit für einen Schritt
+        while (state.paused) {
+            await sleep(100);
+            if (!state.running && !state.decoding) return false;
+        }
+        return state.running || state.decoding;
+    };
 
-  let I = Woerterbuch[encodedStream[0]];
-  let outputStream = [I];
+    // --- Schritt 1 & 2 & 3 & 4 ---
+    if (!(await step(1))) return;
+    let c = inputStream[0]; 
+    updateDecoderVars(c, "-", "-");
 
-  if (callbacks.onOutput) callbacks.onOutput(I);
-  if (callbacks.onProcessRow) callbacks.onProcessRow(I, "-", "-", I);
-
-  for (let i = 1; i < encodedStream.length; i++) {
-    while (state.paused) await sleep(100);
-
-    if (!state.decoding) return;
-
-    const currentCode = encodedStream[i];
-    let J;
-
-    if (currentCode in Woerterbuch) {
-      J = Woerterbuch[currentCode];
-    } else {
-      J = I + I[0];
+    // Falls der erste Code CLEAR ist, überspringen und nächsten nehmen
+    if (c === 256) {
+        inputStream.shift();
+        c = inputStream[0];
     }
 
-    Woerterbuch[nextCode] = I + J[0];
-    const newEntry = `${I}+${J[0]} (${nextCode})`;
-    nextCode++;
+    if (!(await step(2))) return;
+    let J = String(Woerterbuch[c]);
+    updateDecoderVars(c, "-", J);
 
-    outputStream.push(J);
+    if (!(await step(3))) return;
+    decodedStream.push(J);
+    addDecodeOutputToUI(J);
 
-    if (callbacks.onProcessRow) callbacks.onProcessRow(I, J, newEntry, J);
-    if (callbacks.onOutput) callbacks.onOutput(J);
-    if (callbacks.onDictUpdate) callbacks.onDictUpdate(nextCode - 1, I + J[0]);
+    if (!(await step(4))) return;
+    let I = J;
+    updateDecoderVars(c, I, J);
 
-    I = J;
-    await sleep(300);
-  }
+    // --- Schritt 5 (Loop) ---
+    for (let k = 1; k < inputStream.length; k++) {
+        if (!(await step(5))) return;
+        
+        c = inputStream[k];
+        if (!(await step(6))) return;
+        updateDecoderVars(c, I, "-");
 
-  return outputStream.join("");
+        if (c === 257) break; // END CODE
+        if (c === 256) continue; // CLEAR CODE (vereinfacht)
+
+        // Schritt 7, 8, 9, 10
+        if (c in Woerterbuch) {
+            if (!(await step(7))) return;
+            if (!(await step(8))) return;
+            J = String(Woerterbuch[c]);
+        } else {
+            if (!(await step(9))) return;
+            if (!(await step(10))) return;
+            // Der berühmte LZW-Sonderfall: J = I + I[0]
+            let firstCharI = I.split(" ")[0];
+            J = I + " " + firstCharI;
+        }
+        updateDecoderVars(c, I, J);
+
+        // Schritt 11: Neues Wort ins Wörterbuch
+        if (!(await step(11))) return;
+        let firstCharJ = J.split(" ")[0];
+        let newEntry = I + " " + firstCharJ;
+        Woerterbuch[nextCode] = newEntry;
+        addDecodeDictRowToUI(nextCode, newEntry);
+        nextCode++;
+
+        // Schritt 12: Ausgabe
+        if (!(await step(12))) return;
+        decodedStream.push(J);
+        addDecodeOutputToUI(J);
+
+        // Schritt 13: I = J
+        if (!(await step(13))) return;
+        I = J;
+        updateDecoderVars(c, I, J);
+    }
+    
+    // Am Ende Bild zeichnen
+    renderDecodedImage(decodedStream);
 }

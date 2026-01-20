@@ -307,34 +307,50 @@ th {
   filter: var(--index-chip-grayscale);
 }
 
-#decode-canvas {
-  display: block;
-  image-rendering: pixelated;
-  border: var(--border-std);
+/* =================== DECODER STYLING =================== */
+
+/* Grundwerte */
+:root {
+  --decoder-panel-height: 600px;   /* match encoder dict height */
+  --decoder-vars-height: 100px;
+  --pseudocode-font-size: 0.80rem;
+  --pseudocode-line-height: 1.10;
 }
 
-#decode-output-container {
+/* Container */
+#decode-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  padding: var(--space-md);
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
+/* Input section (wie Encoder input) */
+#decode-input-section {
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Input chips = same spacing as encoder */
 #decode-input-stream {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs);
+  gap: var(--space-sm);             /* wie Encoder */
   padding: var(--space-md);
-  max-height: 200px;
-  overflow-y: auto;
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
 }
 
+/* make decode chips match encoder index-chips */
 .decode-chip {
-  min-width: var(--index-chip-size); /* mindestens wie bisher */
-  width: auto; /* wächst mit der Zahl */
+  width: var(--index-chip-size);
   height: var(--index-chip-size);
   display: flex;
   align-items: center;
@@ -347,5 +363,184 @@ th {
   border: var(--i-chip-border);
   transition: var(--anim-scale);
   opacity: var(--opacity-inactive);
-  padding: 0 var(--space-xs); /* horizontal etwas Abstand für lange Zahlen */
+}
+
+/* active/processed states */
+.decode-chip.active {
+  transform: scale(var(--index-chip-active-scale));
+  box-shadow: var(--index-chip-active-glow);
+  border: 2px solid var(--text-primary);
+  opacity: var(--opacity-active);
+}
+.decode-chip.processed {
+  opacity: var(--index-chip-processed-opacity);
+  transform: scale(var(--index-chip-scale));
+  filter: var(--index-chip-grayscale);
+}
+
+/* Output chips (like encoder) */
+#decode-output-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* --- Lower panel layout: left = dict, right = vars + pseudocode --- */
+#decode-container .lower-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+/* Dictionary: fixed panel height, inner wrapper scrolls */
+#decode-dict-section {
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-md);
+  height: var(--decoder-panel-height); /* same height as right side */
+  display: flex;
+  flex-direction: column;
+}
+
+/* single scrollbar: table-wrapper scrolls, outer does not */
+#decode-dict-section .table-wrapper {
+  flex: 1 1 auto;
+  min-height: 0; /* important for flex children to shrink */
+  overflow-y: auto;
+}
+
+/* keep table header sticky inside wrapper */
+#decode-dict-section table thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-panel);
+  z-index: 2;
+}
+
+/* Right side: variables + pseudocode (same total height) */
+#decode-process-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: var(--decoder-panel-height);
+}
+
+/* Variables panel: fixed height, not scrollable */
+#decode-vars-panel {
+  background-color: var(--bg-panel);
+  border: var(--border-std);
+  padding: calc(var(--space-md) - 2px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-xs);
+  height: var(--decoder-vars-height);
+  flex: 0 0 var(--decoder-vars-height);
+  font-family: var(--font-mono);
+}
+
+/* Variable row style (compact) */
+#decode-vars-panel .var-row {
+  font-size: 1rem;
+  color: var(--text-primary);
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 4px;
+}
+
+/* Pseudocode area: takes remaining height, NOT scrollable */
+#decode-pseudocode-section {
+  background-color: #0f1218;
+  border: var(--border-std);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--pseudocode-font-size);
+  line-height: var(--pseudocode-line-height);
+  color: var(--text-primary);
+  flex: 1 1 auto;
+  overflow: hidden; /* no scroll - content should fit */
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Pseudocode lines: tightened vertical spacing, left aligned */
+#decode-pseudocode-section .pseudocode-line {
+  display: block;
+  padding: 2px 6px;
+  margin: 0;
+  word-break: break-word; /* avoid overflow */
+  text-indent: 0;         /* base level 0 starts near left */
+}
+
+/* Indentation levels */
+#decode-pseudocode-section .indent-1 { padding-left: 2.0rem; }
+#decode-pseudocode-section .indent-2 { padding-left: 4.0rem; }
+
+/* small gap between lines */
+#decode-pseudocode-section .pseudocode-line + .pseudocode-line {
+  margin-top: 8px;
+}
+
+/* Base left offset so level-0 is not too far from left edge */
+#decode-pseudocode-section {
+  padding-left: 8px; /* small gutter for left edge */
+}
+
+/* Highlight currently executed line */
+#decode-pseudocode-section .highlight-line {
+  background-color: rgba(0, 255, 140, 0.12);
+  border-left: 3px solid var(--chip-compressed-glow);
+  font-weight: 700;
+  padding-left: calc(6px - 3px); /* compensate for border */
+}
+
+/* Decode canvas framing (consistent frame) */
+#decode-results-section,
+#decode-results-section canvas,
+#decode-canvas {
+  border: var(--border-std);
+  border-radius: var(--radius-sm);
+  background-color: #0e1114;
+  padding: 6px;
+  display: block;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  #decode-container .lower-panel {
+    grid-template-columns: 1fr; /* stack vertically */
+  }
+  #decode-dict-section, #decode-process-section {
+    height: auto;
+  }
+  #decode-pseudocode-section {
+    overflow-y: auto; /* allow scroll on small screens */
+  }
+}
+
+.pseudocode-line.active-line {
+    background-color: var(--pico-primary-background);
+    color: white;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+#decode-canvas {
+    image-rendering: pixelated; /* Verhindert das Verschwimmen */
+    width: 100%;               /* Streckt den Canvas auf Containerbreite */
+    max-width: 500px;
+    height: auto;
+    border: 1px solid #ccc;
 }

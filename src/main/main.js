@@ -272,27 +272,36 @@ showDecodeBtn.addEventListener("click", () => {
 
 // Start-Button für Dekodierung (Platzhalter)
 startDecodeBtn.addEventListener("click", async () => {
-  if (!encodedOutputStream || encodedOutputStream.length === 0) {
-    alert("Keine kodierten Daten vorhanden! Zuerst encoden.");
-    return;
-  }
+    if (!encodedOutputStream || encodedOutputStream.length === 0) {
+        alert("Keine kodierten Daten vorhanden!");
+        return;
+    }
 
-  if (appState.decoding) return; // läuft bereits
+    // Header Buttons reaktivieren für den Decoder
+    appState.decoding = true;
+    appState.paused = false;
+    updateButtonState("running"); // Nutzt die vorhandene Funktion
+    
+    startDecodeBtn.disabled = true;
 
-  const decodeWoerterbuch = initializeWoerterbuch();
-  setDecodeWoerterbuchTabelle(decodeWoerterbuch);
-  addDecodeInputStreamToUI(encodedOutputStream);
+    // Decoder starten
+    const decodeWoerterbuch = initializeWoerterbuch();
+    setDecodeWoerterbuchTabelle(decodeWoerterbuch);
 
-  appState.decoding = true;
-  appState.paused = false;
-
-  await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState, {
-    onOutput: (value) => addDecodeOutputToUI(value),
-    onProcessRow: (I, J, newEntry, output) => addDecodeProcessRowToUI(I, J, newEntry, output),
-    onDictUpdate: (code, entry) => setDecodeWoerterbuchTabelle(decodeWoerterbuch)
-  });
-
-  appState.decoding = false;
+    // WICHTIG: Canvas vorbereiten
+    const decodeCanvas = document.getElementById('decode-canvas');
+    decodeCanvas.width = sourceImage.width;
+    decodeCanvas.height = sourceImage.height;
+    const decodeCtx = decodeCanvas.getContext('2d');
+    decodeCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+    
+    // Pixel-Counter für diesen Durchlauf zurücksetzen
+    window.currentPixelIndex = 0;
+    
+    await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState);
+    
+    appState.decoding = false;
+    updateButtonState("finished");
 });
 
 /**
