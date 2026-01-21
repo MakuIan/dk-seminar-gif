@@ -148,10 +148,7 @@ function setDecodeWoerterbuchTabelle(Woerterbuch) {
 function addDecodeInputStreamToUI(stream) {
   if (!stream || stream.length === 0) return;
   decodeInputStreamSection.innerHTML = stream
-    .map(
-      (code) =>
-        `<div class="index-chip decode-chip">${code}</div>`
-    )
+    .map((code) => `<div class="index-chip decode-chip">${code}</div>`)
     .join("");
 }
 
@@ -290,38 +287,41 @@ function addCompressionStatsToUI(originalSize, compressedSize) {
 }
 
 function highlightPseudocode(lineNumber) {
-    // Alle Zeilen entmarkieren
-    document.querySelectorAll('.pseudocode-line').forEach(el => {
-        el.classList.remove('active-line');
-    });
-    // Aktuelle Zeile markieren
-    const active = document.querySelector(`.pseudocode-line[data-line="${lineNumber}"]`);
-    if (active) active.classList.add('active-line');
+  // Alle Zeilen entmarkieren
+  document.querySelectorAll(".pseudocode-line").forEach((el) => {
+    el.classList.remove("active-line");
+  });
+  // Aktuelle Zeile markieren
+  const active = document.querySelector(
+    `.pseudocode-line[data-line="${lineNumber}"]`
+  );
+  if (active) active.classList.add("active-line");
 }
 
 function updateDecoderVars(c, i, j) {
-    document.getElementById('var-c').textContent = c;
-    document.getElementById('var-i').textContent = i;
-    document.getElementById('var-j').textContent = j;
+  document.getElementById("var-c").textContent = c;
+  document.getElementById("var-i").textContent = i;
+  document.getElementById("var-j").textContent = j;
 }
 
 function addDecodeOutputToUI(sequence) {
-    const container = document.getElementById('decode-output-container');
-    const codes = sequence.split(" ");
-    codes.forEach(code => {
-        const chip = document.createElement("div");
-        chip.classList.add("index-chip", "processed");
-        chip.innerText = code;
-        container.appendChild(chip);
-    });
-    container.scrollTop = container.scrollHeight;
+  const container = document.getElementById("decode-output-container");
+  const codes = sequence.split(" ");
+  codes.forEach((code) => {
+    const chip = document.createElement("div");
+    chip.classList.add("index-chip", "processed");
+    chip.innerText = code;
+    container.appendChild(chip);
+  });
+  container.scrollTop = container.scrollHeight;
 }
 
 function addDecodeDictRowToUI(code, pattern) {
-    const row = `<tr><td>${pattern}</td><td>${code}</td></tr>`;
-    const decodeDictBody = document.getElementById("decode-dict-body");
-    decodeDictBody.insertAdjacentHTML("beforeend", row);
-    decodeDictBody.closest('.table-wrapper').scrollTop = decodeDictBody.closest('.table-wrapper').scrollHeight;
+  const row = `<tr><td>${pattern}</td><td>${code}</td></tr>`;
+  const decodeDictBody = document.getElementById("decode-dict-body");
+  decodeDictBody.insertAdjacentHTML("beforeend", row);
+  decodeDictBody.closest(".table-wrapper").scrollTop =
+    decodeDictBody.closest(".table-wrapper").scrollHeight;
 }
 
 /**
@@ -330,29 +330,78 @@ function addDecodeDictRowToUI(code, pattern) {
  * @param {Array} colorPalette - Die globale Farbpalette
  */
 function drawPixelsFromSequence(sequence, colorPalette) {
-    const canvas = document.getElementById('decode-canvas');
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    
-    // Verhindert Unschärfe bei Vergrößerung
-    canvas.style.imageRendering = 'pixelated';
+  const canvas = document.getElementById("decode-canvas");
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
 
-    // Sequenz "0 1 2" -> [0, 1, 2]
-    const indices = sequence.split(" ").map(Number);
-    
-    indices.forEach(colorIdx => {
-        if (colorPalette[colorIdx]) {
-            const colorRGB = colorPalette[colorIdx].split(",");
-            
-            // Berechne X und Y Koordinate
-            const x = window.currentPixelIndex % width;
-            const y = Math.floor(window.currentPixelIndex / width);
-            
-            ctx.fillStyle = `rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
-            // Zeichne ein 1x1 Pixel großes Rechteck
-            ctx.fillRect(x, y, 1, 1);
-            
-            window.currentPixelIndex++;
-        }
+  // Verhindert Unschärfe bei Vergrößerung
+  canvas.style.imageRendering = "pixelated";
+
+  // Sequenz "0 1 2" -> [0, 1, 2]
+  const indices = sequence.split(" ").map(Number);
+
+  indices.forEach((colorIdx) => {
+    if (colorPalette[colorIdx]) {
+      const colorRGB = colorPalette[colorIdx].split(",");
+
+      // Berechne X und Y Koordinate
+      const x = window.currentPixelIndex % width;
+      const y = Math.floor(window.currentPixelIndex / width);
+
+      ctx.fillStyle = `rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
+      // Zeichne ein 1x1 Pixel großes Rechteck
+      ctx.fillRect(x, y, 1, 1);
+
+      window.currentPixelIndex++;
+    }
+  });
+}
+
+/**
+ * Rendert die Globale Farbtabelle (Palette)
+ * @param {Array<string>} palette - Array von Strings "r,g,b"
+ */
+function renderGlobalTableUI(palette) {
+  const grid = document.getElementById("color-palette-grid");
+  if (!grid) return;
+
+  if (!palette || palette.length === 0) {
+    grid.innerHTML = "";
+    return;
+  }
+  grid.innerHTML = palette
+    .map(
+      (color, index) =>
+        `<div class="palette-swatch" style="background-color:rgb(${color})"; title="Index: ${index}: rgb(${color}"></div>`
+    )
+    .join("");
+}
+/**
+ * Aktualisiert die Anzeige der aktuellen Bit-Breite
+ * @param {number} bits
+ */
+function updateBitWidthUI(bits) {
+  const badge = document.getElementById("bit-width-badge");
+  if (badge) {
+    badge.innerText = `${bits} Bit`;
+    badge.style.transform = "scale(1.3)";
+    setTimeout(() => {
+      badge.style.transform = "scale(1)";
+    }, 200);
+  }
+}
+/**
+ * Highlightet eine Zeile im Encoder-Pseudocode
+ * @param {number} lineNr
+ */
+function highlightEncoderPseudocode(lineNr) {
+  document
+    .querySelectorAll("#encoder-pseudocode-section .pseudocode-line")
+    .forEach((el) => {
+      el.classList.remove("active-line");
     });
+  const active = document.querySelector(
+    `#encoder-pseudocode-section .pseudocode-line[data-eline="${lineNr}"]`
+  );
+  if (active) active.classList.add("active-line");
 }

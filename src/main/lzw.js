@@ -57,6 +57,9 @@ function transformImageDataToIndexStream(imageData) {
  *
  */
 async function runLZW(indexStream, Woerterbuch, state) {
+  updateBitWidthUI(9);
+  highlightEncoderPseudocode(1);
+
   let nextCode = 258;
   const outputStream = [];
   let w = String(indexStream[0]);
@@ -67,29 +70,45 @@ async function runLZW(indexStream, Woerterbuch, state) {
   updateIndexStreamHighlight(0);
   addProcessRowToUI("-", w, "-", "-", false);
 
+  let currentCodeSize = 9;
+  let nextBump = 512;
+
   for (let i = 1; i < indexStream.length; i++) {
     if (!state.running) {
       console.log("Process aborted by user.");
       return;
     }
 
+    highlightEncoderPseudocode(2);
+
     while (state.paused) {
       await sleep(100);
       if (!state.running) return;
     }
+
+    highlightEncoderPseudocode(3);
     updateIndexStreamHighlight(i);
+    await sleep(20);
 
     const k = String(indexStream[i]);
     const wk = w + " " + k;
 
+    highlightEncoderPseudocode(4);
+
     if (wk in Woerterbuch) {
+      highlightEncoderPseudocode(5);
       addProcessRowToUI(w, k, "-", "-", false);
       w = wk;
     } else {
+      highlightEncoderPseudocode(6);
+      await sleep(20);
+
       let codeOutput = Woerterbuch[w];
       outputStream.push(codeOutput);
+      highlightEncoderPseudocode(7);
       addOutputToUI(codeOutput, w);
 
+      highlightEncoderPseudocode(8);
       Woerterbuch[wk] = nextCode;
       addDictRowToUI(nextCode, wk);
 
@@ -97,6 +116,12 @@ async function runLZW(indexStream, Woerterbuch, state) {
       addProcessRowToUI(w, k, newEntryDisplay, w, true);
 
       nextCode++;
+
+      if (nextCode > nextBump && currentCodeSize < 12) {
+        currentCodeSize++;
+        nextBump = 1 << currentCodeSize; // Naechste Potenz (1024,2048,...)
+        updateBitWidthUI(currentCodeSize);
+      }
 
       // Gif erlaubt nur maximal 12 bits Code Laengen (4096 Eintraege im Woerterbuch)
       if (nextCode >= 4096) {
@@ -106,12 +131,18 @@ async function runLZW(indexStream, Woerterbuch, state) {
         const tempDict = initializeWoerterbuch();
         Object.assign(Woerterbuch, tempDict);
         nextCode = 258;
+
+        currentCodeSize = 9;
+        nextBump = 512;
+        updateBitWidthUI(9);
       }
 
+      highlightEncoderPseudocode(9);
       w = String(k);
     }
-    await sleep(1000);
+    await sleep(appState && appState.speed ? appState.speed : 800);
   }
+  highlightEncoderPseudocode(10);
   if (w !== "") {
     let codeOutput = Woerterbuch[w];
     outputStream.push(codeOutput);
@@ -120,6 +151,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
 
   outputStream.push(Woerterbuch["end"]);
   addOutputToUI(Woerterbuch["end"], "END CODE");
+  highlightEncoderPseudocode(-1);
 
   console.log("Final Output Stream:", outputStream);
 
@@ -127,7 +159,6 @@ async function runLZW(indexStream, Woerterbuch, state) {
 
   return outputStream;
 }
-
 
 /**
  * ============================================================================
@@ -138,15 +169,15 @@ async function runLZW(indexStream, Woerterbuch, state) {
 async function runLZWDecoder(inputStream, Woerterbuch, state) {
   let nextCode = 258;
   window.currentPixelIndex = 0; // Startwert für die Zeichnung
-  
+
   const step = async (line) => {
-      highlightPseudocode(line);
-      await sleep(800); 
-      while (state.paused) {
-          await sleep(100);
-          if (!state.decoding) return false;
-      }
-      return state.decoding;
+    highlightPseudocode(line);
+    await sleep(800);
+    while (state.paused) {
+      await sleep(100);
+      if (!state.decoding) return false;
+    }
+    return state.decoding;
   };
   // --- INITIALISIERUNG ---
   if (!(await step(1))) return;
@@ -154,10 +185,10 @@ async function runLZWDecoder(inputStream, Woerterbuch, state) {
   let c = inputStream[pointer];
   // 1. Check: Ist der erste Code ein CLEAR-Code?
   if (c === 256) {
-      updateDecoderVars(256, "Init", "CLEAR");
-      pointer++; 
-      c = inputStream[pointer]; // Nimm den echten ersten Daten-Code
-      if (!(await step(1))) return; 
+    updateDecoderVars(256, "Init", "CLEAR");
+    pointer++;
+    c = inputStream[pointer]; // Nimm den echten ersten Daten-Code
+    if (!(await step(1))) return;
   }
   if (!(await step(2))) return;
   let J = String(Woerterbuch[c]);
@@ -170,50 +201,50 @@ async function runLZWDecoder(inputStream, Woerterbuch, state) {
   updateDecoderVars(c, I, J);
   // --- SCHLEIFE ---
   for (let k = pointer + 1; k < inputStream.length; k++) {
-      if (!(await step(5))) return;
-      
-      c = inputStream[k];
-      
-      // Ende-Bedingung
-      if (c === 257) { 
-          updateDecoderVars(257, I, "END");
-          break; 
-      }
-      // Falls zwischendurch ein CLEAR kommt (selten in einfachen GIFs)
-      if (c === 256) continue;
-      if (!(await step(6))) return;
-      updateDecoderVars(c, I, "-");
-      if (c in Woerterbuch) {
-          if (!(await step(7))) return;
-          if (!(await step(8))) return;
-          J = String(Woerterbuch[c]);
-      } else {
-          if (!(await step(9))) return;
-          if (!(await step(10))) return;
-          // Sonderfall: Kette noch nicht im Dict (Kette + erstes Zeichen der Kette)
-          let firstCharI = I.split(" ")[0];
-          J = I + " " + firstCharI;
-      }
-      updateDecoderVars(c, I, J);
-      if (!(await step(11))) return;
-      let firstCharJ = J.split(" ")[0];
-      let newEntry = I + " " + firstCharJ;
-      Woerterbuch[nextCode] = newEntry;
-      addDecodeDictRowToUI(nextCode, newEntry); // UI-Aufruf
-      nextCode++;
-      if (!(await step(12))) return;
-      addDecodeOutputToUI(J);
-      drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
-      if (!(await step(13))) return;
-      I = J;
-      updateDecoderVars(c, I, J);
-  }
-  
-  highlightPseudocode(-1); // Eine ID, die es nicht gibt, um alle Highlights zu löschen
-    console.log("Dekodierung abgeschlossen.");
-    
-    // Optional: Eine Erfolgsmeldung in die UI schreiben
-    if (typeof showDecodeFinished === "function") {
-        showDecodeFinished(); 
+    if (!(await step(5))) return;
+
+    c = inputStream[k];
+
+    // Ende-Bedingung
+    if (c === 257) {
+      updateDecoderVars(257, I, "END");
+      break;
     }
+    // Falls zwischendurch ein CLEAR kommt (selten in einfachen GIFs)
+    if (c === 256) continue;
+    if (!(await step(6))) return;
+    updateDecoderVars(c, I, "-");
+    if (c in Woerterbuch) {
+      if (!(await step(7))) return;
+      if (!(await step(8))) return;
+      J = String(Woerterbuch[c]);
+    } else {
+      if (!(await step(9))) return;
+      if (!(await step(10))) return;
+      // Sonderfall: Kette noch nicht im Dict (Kette + erstes Zeichen der Kette)
+      let firstCharI = I.split(" ")[0];
+      J = I + " " + firstCharI;
+    }
+    updateDecoderVars(c, I, J);
+    if (!(await step(11))) return;
+    let firstCharJ = J.split(" ")[0];
+    let newEntry = I + " " + firstCharJ;
+    Woerterbuch[nextCode] = newEntry;
+    addDecodeDictRowToUI(nextCode, newEntry); // UI-Aufruf
+    nextCode++;
+    if (!(await step(12))) return;
+    addDecodeOutputToUI(J);
+    drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
+    if (!(await step(13))) return;
+    I = J;
+    updateDecoderVars(c, I, J);
+  }
+
+  highlightPseudocode(-1); // Eine ID, die es nicht gibt, um alle Highlights zu löschen
+  console.log("Dekodierung abgeschlossen.");
+
+  // Optional: Eine Erfolgsmeldung in die UI schreiben
+  if (typeof showDecodeFinished === "function") {
+    showDecodeFinished();
+  }
 }

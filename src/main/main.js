@@ -125,9 +125,12 @@ sourceImage.onload = () => {
     alert(
       "Das Bild hat zu viele Farben! Bitte ein Bild mit maximal 256 Farben hochladen!"
     );
+    return;
   }
   indexStream = result.indexStream;
   globalColorPalette = result.colorPalette;
+
+  renderGlobalTableUI(globalColorPalette);
   addIndexStreamOutputToUI(indexStream, globalColorPalette);
 
   console.log("Index Stream:", indexStream);
@@ -137,7 +140,7 @@ sourceImage.onload = () => {
 // EventListener fuers Starten des Algos
 startBtn.addEventListener("click", async () => {
   if (appState.running) return;
-  
+
   // Security Check: Has an image been loaded?
   if (!indexStream || indexStream.length === 0) {
     alert("Bitte zuerst ein Bild laden!");
@@ -151,9 +154,8 @@ startBtn.addEventListener("click", async () => {
 
   outputContainer.innerHTML = "";
   processTableBody.innerHTML = ""; // Tabelle Prozess löschen
-  dictBody.innerHTML = "";         // Wörterbuch-Tabelle löschen
-  resultsSection.innerHTML = "";   // Kompressionsstatistik löschen
-
+  dictBody.innerHTML = ""; // Wörterbuch-Tabelle löschen
+  resultsSection.innerHTML = ""; // Kompressionsstatistik löschen
 
   const Woerterbuch = initializeWoerterbuch();
   setWoerterbuchTabelle(Woerterbuch);
@@ -224,37 +226,39 @@ resetBtn.addEventListener("click", () => {
   updateButtonState("idle"); // Hier wird startBtn wieder auf false (also klickbar) gesetzt
 
   // === Decoder UI zurücksetzen ===
-  decodeContainer.style.display = "none"; 
-  showDecodeBtn.disabled = true; 
+  decodeContainer.style.display = "none";
+  showDecodeBtn.disabled = true;
   startDecodeBtn.disabled = false; // Wieder bereit für nächsten Lauf
-  decodeInputStreamSection.innerHTML = ""; 
-  decodeDictBody.innerHTML = ""; 
-  encodedOutputStream = null; 
-  
-  const decodeOutputContainer = document.getElementById("decode-output-container");
+  decodeInputStreamSection.innerHTML = "";
+  decodeDictBody.innerHTML = "";
+  encodedOutputStream = null;
+
+  const decodeOutputContainer = document.getElementById(
+    "decode-output-container"
+  );
   if (decodeOutputContainer) decodeOutputContainer.innerHTML = "";
 
   // Bild und Canvas komplett löschen
-  sourceImage.src = "";           
-  ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height); 
+  sourceImage.src = "";
+  ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
   imageCanvas.width = 0;
   imageCanvas.height = 0;
 
   // Decoder Canvas löschen
-  const decodeCanvas = document.getElementById('decode-canvas');
+  const decodeCanvas = document.getElementById("decode-canvas");
   if (decodeCanvas) {
-      const dCtx = decodeCanvas.getContext('2d');
-      dCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
-      decodeCanvas.width = 0;
-      decodeCanvas.height = 0;
+    const dCtx = decodeCanvas.getContext("2d");
+    dCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+    decodeCanvas.width = 0;
+    decodeCanvas.height = 0;
   }
 
   // Daten leeren
   indexStream = null;
   globalColorPalette = null;
   indexStreamSection.innerHTML = "";
-  imgInput.value = "";            
-  imgInput.disabled = false;      
+  imgInput.value = "";
+  imgInput.disabled = false;
 
   // Wörterbuch didaktisch zurücksetzen
   const initialWoerterbuch = initializeWoerterbuch();
@@ -264,7 +268,7 @@ resetBtn.addEventListener("click", () => {
   outputContainer.innerHTML = "";
   processTableBody.innerHTML = "";
   resultsSection.innerHTML = "";
-  
+
   // Start-Button explizit freigeben (sicher ist sicher)
   startBtn.disabled = false;
 });
@@ -283,36 +287,36 @@ showDecodeBtn.addEventListener("click", () => {
 
 // Start-Button für Dekodierung (Platzhalter)
 startDecodeBtn.addEventListener("click", async () => {
-    if (!encodedOutputStream || encodedOutputStream.length === 0) {
-        alert("Keine kodierten Daten vorhanden!");
-        return;
-    }
+  if (!encodedOutputStream || encodedOutputStream.length === 0) {
+    alert("Keine kodierten Daten vorhanden!");
+    return;
+  }
 
-    // Header Buttons reaktivieren für den Decoder
-    appState.decoding = true;
-    appState.paused = false;
-    updateButtonState("running"); // Nutzt die vorhandene Funktion
-    
-    startDecodeBtn.disabled = true;
+  // Header Buttons reaktivieren für den Decoder
+  appState.decoding = true;
+  appState.paused = false;
+  updateButtonState("running"); // Nutzt die vorhandene Funktion
 
-    // Decoder starten
-    const decodeWoerterbuch = initializeWoerterbuch();
-    setDecodeWoerterbuchTabelle(decodeWoerterbuch);
+  startDecodeBtn.disabled = true;
 
-    // WICHTIG: Canvas vorbereiten
-    const decodeCanvas = document.getElementById('decode-canvas');
-    decodeCanvas.width = sourceImage.width;
-    decodeCanvas.height = sourceImage.height;
-    const decodeCtx = decodeCanvas.getContext('2d');
-    decodeCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
-    
-    // Pixel-Counter für diesen Durchlauf zurücksetzen
-    window.currentPixelIndex = 0;
-    
-    await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState);
-    
-    appState.decoding = false;
-    updateButtonState("finished");
+  // Decoder starten
+  const decodeWoerterbuch = initializeWoerterbuch();
+  setDecodeWoerterbuchTabelle(decodeWoerterbuch);
+
+  // WICHTIG: Canvas vorbereiten
+  const decodeCanvas = document.getElementById("decode-canvas");
+  decodeCanvas.width = sourceImage.width;
+  decodeCanvas.height = sourceImage.height;
+  const decodeCtx = decodeCanvas.getContext("2d");
+  decodeCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+
+  // Pixel-Counter für diesen Durchlauf zurücksetzen
+  window.currentPixelIndex = 0;
+
+  await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState);
+
+  appState.decoding = false;
+  updateButtonState("finished");
 });
 
 /**

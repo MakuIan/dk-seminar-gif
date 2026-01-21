@@ -71,6 +71,10 @@
           </div>
           <section id="index-stream-section"></section>
         </section>
+        <section id="color-table-section">
+          <h2>Farbtabelle</h2>
+          <div id="color-palette-grid"></div>
+        </section>
         <div class="lower-panel">
           <section id="lzw-dict-section">
             <h2>LZW Wörterbuch</h2>
@@ -87,13 +91,47 @@
             </div>
           </section>
           <section id="lzw-process-section">
-            <h2>LZW Prozess-Schritte</h2>
+            <div class="header-with-badge">
+              <h2>LZW Encoder</h2>
+              <span id="bit-width-badge" class="badge">9 Bit</span>
+            </div>
+
+            <div id="encoder-pseudocode-section" class="pseudocode-container">
+              <div class="pseudocode-line" data-eline="1">
+                W := Lies ersten Pixel
+              </div>
+              <div class="pseudocode-line" data-eline="2">
+                Solange noch Pixel K vorhanden:
+              </div>
+              <div class="pseudocode-line indent-1" data-eline="3">
+                Lies nächsten Pixel K
+              </div>
+              <div class="pseudocode-line indent-1" data-eline="4">
+                Wenn (W + K) im Wörterbuch?
+              </div>
+              <div class="pseudocode-line indent-2" data-eline="5">
+                W := W + K
+              </div>
+              <div class="pseudocode-line indent-1" data-eline="6">Sonst:</div>
+              <div class="pseudocode-line indent-2" data-eline="7">
+                Gib Code für W aus
+              </div>
+              <div class="pseudocode-line indent-2" data-eline="8">
+                Füge (W + K) ins Wörterbuch
+              </div>
+              <div class="pseudocode-line indent-2" data-eline="9">W := K</div>
+              <div class="pseudocode-line" data-eline="10">
+                Gib Code für W aus (Rest)
+              </div>
+            </div>
+
+            <h3>LZW Prozess-Schritte</h3>
             <div class="lzw-process-table-wrapper">
               <table id="process-table">
                 <thead>
                   <tr>
-                    <th>letztes Wort</th>
-                    <th>aktuelles Wort</th>
+                    <th>letztes Wort (W)</th>
+                    <th>aktuelles Wort (K)</th>
                     <th>Neuer Eintrag</th>
                     <th>Code Ausgabe</th>
                   </tr>
@@ -114,14 +152,11 @@
 
         <!-- Button zum Einblenden des Dekodierers -->
         <section id="decode-control-section">
-          <button id="show-decode-btn" disabled>
-            Dekodierung anzeigen
-          </button>
+          <button id="show-decode-btn" disabled>Dekodierung anzeigen</button>
         </section>
 
         <!-- Dekodier-Container (initial versteckt) -->
         <div id="decode-container" style="display: none">
-
           <!-- INPUT -->
           <section id="decode-input-section">
             <h2>Input (Code-Sequenz)</h2>
@@ -130,14 +165,11 @@
             <div id="decode-input-stream"></div>
 
             <!-- Start-Button: bewusst direkt hier -->
-            <button id="start-decode-btn">
-              Dekodierung starten
-            </button>
+            <button id="start-decode-btn">Dekodierung starten</button>
           </section>
 
           <!-- Wörterbuch + Prozess (analog zu lower-panel beim Encoder) -->
           <div class="lower-panel">
-
             <!-- Wörterbuch -->
             <section id="decode-dict-section">
               <h2>LZW Wörterbuch</h2>
@@ -172,15 +204,9 @@
                 <div class="pseudocode-line" data-line="1">
                   c := Lies ersten Code aus dem Input-Stream
                 </div>
-                <div class="pseudocode-line" data-line="2">
-                  J := W[c]
-                </div>
-                <div class="pseudocode-line" data-line="3">
-                  Gib J aus
-                </div>
-                <div class="pseudocode-line" data-line="4">
-                  I := J
-                </div>
+                <div class="pseudocode-line" data-line="2">J := W[c]</div>
+                <div class="pseudocode-line" data-line="3">Gib J aus</div>
+                <div class="pseudocode-line" data-line="4">I := J</div>
                 <div class="pseudocode-line" data-line="5">
                   Solange noch Codes vorhanden:
                 </div>
@@ -193,9 +219,7 @@
                 <div class="pseudocode-line indent-2" data-line="8">
                   J := W[c]
                 </div>
-                <div class="pseudocode-line indent-1" data-line="9">
-                  Sonst:
-                </div>
+                <div class="pseudocode-line indent-1" data-line="9">Sonst:</div>
                 <div class="pseudocode-line indent-2" data-line="10">
                   J := I + I[0]
                 </div>
@@ -209,9 +233,7 @@
                   I := J
                 </div>
               </div>
-              
             </section>
-
           </div>
 
           <!-- OUTPUT STREAM -->
@@ -225,7 +247,6 @@
             <h2>Rekonstruiertes Bild</h2>
             <canvas id="decode-canvas"></canvas>
           </section>
-
         </div>
       </div>
     </main>
