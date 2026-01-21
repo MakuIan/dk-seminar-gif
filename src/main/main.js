@@ -218,43 +218,54 @@ resumeBtn.addEventListener("click", () => {
 resetBtn.addEventListener("click", () => {
   appState.running = false;
   appState.paused = false;
-  resetUI();
-  updateButtonState("idle");
+  appState.decoding = false; // Stoppt auch Decoder-Prozess
 
-  // === NEU: Decoder komplett zurücksetzen ===
-  decodeContainer.style.display = "none"; // === NEU ===
-  showDecodeBtn.disabled = true; // === NEU ===
-  decodeInputStreamSection.innerHTML = ""; // === NEU ===
-  decodeDictBody.innerHTML = ""; // === NEU ===
-  encodedOutputStream = null; // === NEU ===
+  resetUI();
+  updateButtonState("idle"); // Hier wird startBtn wieder auf false (also klickbar) gesetzt
+
+  // === Decoder UI zurücksetzen ===
+  decodeContainer.style.display = "none"; 
+  showDecodeBtn.disabled = true; 
+  startDecodeBtn.disabled = false; // Wieder bereit für nächsten Lauf
+  decodeInputStreamSection.innerHTML = ""; 
+  decodeDictBody.innerHTML = ""; 
+  encodedOutputStream = null; 
+  
+  const decodeOutputContainer = document.getElementById("decode-output-container");
+  if (decodeOutputContainer) decodeOutputContainer.innerHTML = "";
+
+  // Bild und Canvas komplett löschen
+  sourceImage.src = "";           
+  ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height); 
+  imageCanvas.width = 0;
+  imageCanvas.height = 0;
+
+  // Decoder Canvas löschen
+  const decodeCanvas = document.getElementById('decode-canvas');
+  if (decodeCanvas) {
+      const dCtx = decodeCanvas.getContext('2d');
+      dCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+      decodeCanvas.width = 0;
+      decodeCanvas.height = 0;
+  }
+
+  // Daten leeren
+  indexStream = null;
+  globalColorPalette = null;
+  indexStreamSection.innerHTML = "";
+  imgInput.value = "";            
+  imgInput.disabled = false;      
+
+  // Wörterbuch didaktisch zurücksetzen
+  const initialWoerterbuch = initializeWoerterbuch();
+  setWoerterbuchTabelle(initialWoerterbuch);
 
   // Ergebnisse + Kompressionsstatistik löschen
   outputContainer.innerHTML = "";
   processTableBody.innerHTML = "";
   resultsSection.innerHTML = "";
-
-  // === Wörterbuch auf Initialwerte zurücksetzen ===
-  const initialWoerterbuch = initializeWoerterbuch();
-  setWoerterbuchTabelle(initialWoerterbuch);
-
-  // === Bild und Canvas zurücksetzen ===
-  sourceImage.src = "";           
-  ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height); // Canvas komplett leeren
-  imageCanvas.width = 0;
-  imageCanvas.height = 0;
-
-  // === Input-Stream und Palette leeren ===
-  indexStream = null;
-  globalColorPalette = null;
-
-  // Index-Stream UI leeren
-  indexStreamSection.innerHTML = "";
-
-  // Bild-Upload wieder freigeben
-  imgInput.value = "";            // Input zurücksetzen
-  imgInput.disabled = false;      // Input wieder aktivieren
-
-  // Start-Button wieder freigeben
+  
+  // Start-Button explizit freigeben (sicher ist sicher)
   startBtn.disabled = false;
 });
 

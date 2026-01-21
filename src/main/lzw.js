@@ -136,87 +136,84 @@ async function runLZW(indexStream, Woerterbuch, state) {
  *
  */
 async function runLZWDecoder(inputStream, Woerterbuch, state) {
-    let nextCode = 258;
-    let decodedStream = [];
+  let nextCode = 258;
+  window.currentPixelIndex = 0; // Startwert für die Zeichnung
+  
+  const step = async (line) => {
+      highlightPseudocode(line);
+      await sleep(800); 
+      while (state.paused) {
+          await sleep(100);
+          if (!state.decoding) return false;
+      }
+      return state.decoding;
+  };
+  // --- INITIALISIERUNG ---
+  if (!(await step(1))) return;
+  let pointer = 0;
+  let c = inputStream[pointer];
+  // 1. Check: Ist der erste Code ein CLEAR-Code?
+  if (c === 256) {
+      updateDecoderVars(256, "Init", "CLEAR");
+      pointer++; 
+      c = inputStream[pointer]; // Nimm den echten ersten Daten-Code
+      if (!(await step(1))) return; 
+  }
+  if (!(await step(2))) return;
+  let J = String(Woerterbuch[c]);
+  updateDecoderVars(c, "-", J);
+  if (!(await step(3))) return;
+  addDecodeOutputToUI(J);
+  drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
+  if (!(await step(4))) return;
+  let I = J;
+  updateDecoderVars(c, I, J);
+  // --- SCHLEIFE ---
+  for (let k = pointer + 1; k < inputStream.length; k++) {
+      if (!(await step(5))) return;
+      
+      c = inputStream[k];
+      
+      // Ende-Bedingung
+      if (c === 257) { 
+          updateDecoderVars(257, I, "END");
+          break; 
+      }
+      // Falls zwischendurch ein CLEAR kommt (selten in einfachen GIFs)
+      if (c === 256) continue;
+      if (!(await step(6))) return;
+      updateDecoderVars(c, I, "-");
+      if (c in Woerterbuch) {
+          if (!(await step(7))) return;
+          if (!(await step(8))) return;
+          J = String(Woerterbuch[c]);
+      } else {
+          if (!(await step(9))) return;
+          if (!(await step(10))) return;
+          // Sonderfall: Kette noch nicht im Dict (Kette + erstes Zeichen der Kette)
+          let firstCharI = I.split(" ")[0];
+          J = I + " " + firstCharI;
+      }
+      updateDecoderVars(c, I, J);
+      if (!(await step(11))) return;
+      let firstCharJ = J.split(" ")[0];
+      let newEntry = I + " " + firstCharJ;
+      Woerterbuch[nextCode] = newEntry;
+      addDecodeDictRowToUI(nextCode, newEntry); // UI-Aufruf
+      nextCode++;
+      if (!(await step(12))) return;
+      addDecodeOutputToUI(J);
+      drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
+      if (!(await step(13))) return;
+      I = J;
+      updateDecoderVars(c, I, J);
+  }
+  
+  highlightPseudocode(-1); // Eine ID, die es nicht gibt, um alle Highlights zu löschen
+    console.log("Dekodierung abgeschlossen.");
     
-    // Hilfsfunktion für Pseudocode-Highlighting
-    const step = async (line) => {
-        highlightPseudocode(line);
-        await sleep(1000); // Zeit für einen Schritt
-        while (state.paused) {
-            await sleep(100);
-            if (!state.running && !state.decoding) return false;
-        }
-        return state.running || state.decoding;
-    };
-
-    // --- Schritt 1 & 2 & 3 & 4 ---
-    if (!(await step(1))) return;
-    let c = inputStream[0]; 
-    updateDecoderVars(c, "-", "-");
-
-    // Falls der erste Code CLEAR ist, überspringen und nächsten nehmen
-    if (c === 256) {
-        inputStream.shift();
-        c = inputStream[0];
+    // Optional: Eine Erfolgsmeldung in die UI schreiben
+    if (typeof showDecodeFinished === "function") {
+        showDecodeFinished(); 
     }
-
-    if (!(await step(2))) return;
-    let J = String(Woerterbuch[c]);
-    updateDecoderVars(c, "-", J);
-
-    if (!(await step(3))) return;
-    decodedStream.push(J);
-    addDecodeOutputToUI(J);
-
-    if (!(await step(4))) return;
-    let I = J;
-    updateDecoderVars(c, I, J);
-
-    // --- Schritt 5 (Loop) ---
-    for (let k = 1; k < inputStream.length; k++) {
-        if (!(await step(5))) return;
-        
-        c = inputStream[k];
-        if (!(await step(6))) return;
-        updateDecoderVars(c, I, "-");
-
-        if (c === 257) break; // END CODE
-        if (c === 256) continue; // CLEAR CODE (vereinfacht)
-
-        // Schritt 7, 8, 9, 10
-        if (c in Woerterbuch) {
-            if (!(await step(7))) return;
-            if (!(await step(8))) return;
-            J = String(Woerterbuch[c]);
-        } else {
-            if (!(await step(9))) return;
-            if (!(await step(10))) return;
-            // Der berühmte LZW-Sonderfall: J = I + I[0]
-            let firstCharI = I.split(" ")[0];
-            J = I + " " + firstCharI;
-        }
-        updateDecoderVars(c, I, J);
-
-        // Schritt 11: Neues Wort ins Wörterbuch
-        if (!(await step(11))) return;
-        let firstCharJ = J.split(" ")[0];
-        let newEntry = I + " " + firstCharJ;
-        Woerterbuch[nextCode] = newEntry;
-        addDecodeDictRowToUI(nextCode, newEntry);
-        nextCode++;
-
-        // Schritt 12: Ausgabe
-        if (!(await step(12))) return;
-        decodedStream.push(J);
-        addDecodeOutputToUI(J);
-
-        // Schritt 13: I = J
-        if (!(await step(13))) return;
-        I = J;
-        updateDecoderVars(c, I, J);
-    }
-    
-    // Am Ende Bild zeichnen
-    renderDecodedImage(decodedStream);
 }

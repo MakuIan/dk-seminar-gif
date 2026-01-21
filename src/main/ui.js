@@ -200,8 +200,8 @@ function updateButtonState(state) {
       resetBtn.disabled = false;
       break;
     case "finished":
+      // Neue State Logik, erst Reset nötig, um sauber neuzustarten
       resetBtn.disabled = false;
-      startBtn.disabled = false;
       break;
   }
 }
@@ -324,25 +324,35 @@ function addDecodeDictRowToUI(code, pattern) {
     decodeDictBody.closest('.table-wrapper').scrollTop = decodeDictBody.closest('.table-wrapper').scrollHeight;
 }
 
+/**
+ * Zeichnet Pixel-Sequenzen live auf den Canvas
+ * @param {string} sequence - Die Sequenz der Farbindizes (z.B. "0 1 2")
+ * @param {Array} colorPalette - Die globale Farbpalette
+ */
 function drawPixelsFromSequence(sequence, colorPalette) {
     const canvas = document.getElementById('decode-canvas');
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     
-    // Die Sequenz ist z.B. "0 1 0"
+    // Verhindert Unschärfe bei Vergrößerung
+    canvas.style.imageRendering = 'pixelated';
+
+    // Sequenz "0 1 2" -> [0, 1, 2]
     const indices = sequence.split(" ").map(Number);
     
     indices.forEach(colorIdx => {
-        const colorRGB = colorPalette[colorIdx].split(",");
-        
-        // Berechne X und Y Koordinate basierend auf dem aktuellen Pixel-Index
-        const x = window.currentPixelIndex % width;
-        const y = Math.floor(window.currentPixelIndex / width);
-        
-        // Zeichne genau dieses eine Pixel (1x1 Quadrat)
-        ctx.fillStyle = `rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
-        ctx.fillRect(x, y, 1, 1);
-        
-        window.currentPixelIndex++;
+        if (colorPalette[colorIdx]) {
+            const colorRGB = colorPalette[colorIdx].split(",");
+            
+            // Berechne X und Y Koordinate
+            const x = window.currentPixelIndex % width;
+            const y = Math.floor(window.currentPixelIndex / width);
+            
+            ctx.fillStyle = `rgb(${colorRGB[0]}, ${colorRGB[1]}, ${colorRGB[2]})`;
+            // Zeichne ein 1x1 Pixel großes Rechteck
+            ctx.fillRect(x, y, 1, 1);
+            
+            window.currentPixelIndex++;
+        }
     });
 }

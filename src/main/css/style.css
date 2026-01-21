@@ -131,9 +131,7 @@ header {
 #lzw-dict-section,
 #lzw-process-section {
   width: 100%;
-  height: 600px; /* ÄNDERUNG: flexibler als 100% */
-  /* min-height: 550px; /* ÄNDERUNG: mehr Platz vertikal */
-  /* max-height: 600px; */
+  height: 600px;
   display: flex;
   flex-direction: column;
 }
@@ -143,6 +141,7 @@ header {
   overflow: visible;
   margin-bottom: var(--space-lg);
 }
+
 #results-section {
   display: block;
   height: auto !important;
@@ -156,7 +155,7 @@ header {
 .lzw-process-table-wrapper {
   flex: 1;
   min-height: 0;
-  max-height: 550px; /* ÄNDERUNG: mehr sichtbare Zeilen, scrollt danach */
+  max-height: 550px;
   overflow-y: auto;
   border: var(--border-std);
 }
@@ -173,24 +172,12 @@ th {
 }
 
 @keyframes slideInRow {
-  0% {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-    background-color: var(--bg-transparent);
-  }
+  0% { transform: translateX(-20px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; background-color: var(--bg-transparent); }
 }
 
-.process-step-found {
-  color: #aaa;
-}
-.process-step-new {
-  background-color: rgba(0, 255, 140, 0.1);
-  font-weight: bold;
-}
+.process-step-found { color: #aaa; }
+.process-step-new { background-color: rgba(0, 255, 140, 0.1); font-weight: bold; }
 
 .canvas-wrapper {
   position: relative;
@@ -249,14 +236,8 @@ th {
 }
 
 @keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* IndexStream Styling */
@@ -289,10 +270,6 @@ th {
   opacity: var(--opacity-inactive);
 }
 
-.index-chip.pending {
-  opacity: 2;
-}
-
 .index-chip.active {
   transform: scale(var(--index-chip-active-scale));
   z-index: var(--zindex-sticky);
@@ -309,37 +286,23 @@ th {
 
 /* =================== DECODER STYLING =================== */
 
-/* Grundwerte */
-:root {
-  --decoder-panel-height: 600px;   /* match encoder dict height */
-  --decoder-vars-height: 100px;
-  --pseudocode-font-size: 0.80rem;
-  --pseudocode-line-height: 1.10;
-}
-
-/* Container */
 #decode-container {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-/* Input section (wie Encoder input) */
 #decode-input-section {
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--radius-md);
   padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
 }
 
-/* Input chips = same spacing as encoder */
 #decode-input-stream {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);             /* wie Encoder */
+  gap: var(--space-sm);
   padding: var(--space-md);
   background-color: var(--bg-panel);
   border: var(--border-std);
@@ -348,7 +311,7 @@ th {
   overflow-y: auto;
 }
 
-/* make decode chips match encoder index-chips */
+/* Decode Chips folgen nun exakt dem Index-Chip Stil */
 .decode-chip {
   width: var(--index-chip-size);
   height: var(--index-chip-size);
@@ -365,20 +328,21 @@ th {
   opacity: var(--opacity-inactive);
 }
 
-/* active/processed states */
 .decode-chip.active {
   transform: scale(var(--index-chip-active-scale));
-  box-shadow: var(--index-chip-active-glow);
+  z-index: var(--zindex-sticky);
   border: 2px solid var(--text-primary);
+  box-shadow: var(--index-chip-active-glow);
   opacity: var(--opacity-active);
 }
+
 .decode-chip.processed {
   opacity: var(--index-chip-processed-opacity);
   transform: scale(var(--index-chip-scale));
   filter: var(--index-chip-grayscale);
 }
 
-/* Output chips (like encoder) */
+/* Decoder Output Bereich */
 #decode-output-container {
   display: flex;
   flex-wrap: wrap;
@@ -391,7 +355,23 @@ th {
   overflow-y: auto;
 }
 
-/* --- Lower panel layout: left = dict, right = vars + pseudocode --- */
+/* Spezial-Klasse für die farbigen Output-Pixel im Decoder */
+.decode-output-pixel {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  border: 1px solid rgba(255,255,255,0.2);
+  animation: popIn var(--anim-speed-normal) ease-out;
+}
+
 #decode-container .lower-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -399,148 +379,98 @@ th {
   align-items: start;
 }
 
-/* Dictionary: fixed panel height, inner wrapper scrolls */
 #decode-dict-section {
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--border-radius-card);
   padding: var(--space-md);
-  height: var(--decoder-panel-height); /* same height as right side */
+  height: 600px;
   display: flex;
   flex-direction: column;
 }
 
-/* single scrollbar: table-wrapper scrolls, outer does not */
 #decode-dict-section .table-wrapper {
-  flex: 1 1 auto;
-  min-height: 0; /* important for flex children to shrink */
+  flex: 1;
   overflow-y: auto;
 }
 
-/* keep table header sticky inside wrapper */
-#decode-dict-section table thead th {
-  position: sticky;
-  top: 0;
-  background-color: var(--bg-panel);
-  z-index: 2;
-}
-
-/* Right side: variables + pseudocode (same total height) */
 #decode-process-section {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  height: var(--decoder-panel-height);
+  height: 600px;
 }
 
-/* Variables panel: fixed height, not scrollable */
 #decode-vars-panel {
   background-color: var(--bg-panel);
   border: var(--border-std);
-  padding: calc(var(--space-md) - 2px);
+  padding: var(--space-md);
+  height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--space-xs);
-  height: var(--decoder-vars-height);
-  flex: 0 0 var(--decoder-vars-height);
-  font-family: var(--font-mono);
 }
 
-/* Variable row style (compact) */
 #decode-vars-panel .var-row {
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-family: var(--font-mono);
   color: var(--text-primary);
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 2px 4px;
 }
 
-/* Pseudocode area: takes remaining height, NOT scrollable */
+#decode-vars-panel .var-row span {
+  color: var(--chip-compressed-glow);
+  font-weight: bold;
+}
+
 #decode-pseudocode-section {
   background-color: #0f1218;
   border: var(--border-std);
   padding: var(--space-md);
   font-family: var(--font-mono);
-  font-size: var(--pseudocode-font-size);
-  line-height: var(--pseudocode-line-height);
+  font-size: 0.8rem;
+  line-height: 1.3;
   color: var(--text-primary);
-  flex: 1 1 auto;
-  overflow: hidden; /* no scroll - content should fit */
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pseudocode-line {
   display: block;
-  box-sizing: border-box;
-}
-
-/* Pseudocode lines: tightened vertical spacing, left aligned */
-#decode-pseudocode-section .pseudocode-line {
-  display: block;
-  padding: 2px 6px;
-  margin: 0;
-  word-break: break-word; /* avoid overflow */
-  text-indent: 0;         /* base level 0 starts near left */
-}
-
-/* Indentation levels */
-#decode-pseudocode-section .indent-1 { padding-left: 2.0rem; }
-#decode-pseudocode-section .indent-2 { padding-left: 4.0rem; }
-
-/* small gap between lines */
-#decode-pseudocode-section .pseudocode-line + .pseudocode-line {
-  margin-top: 8px;
-}
-
-/* Base left offset so level-0 is not too far from left edge */
-#decode-pseudocode-section {
-  padding-left: 8px; /* small gutter for left edge */
-}
-
-/* Highlight currently executed line */
-#decode-pseudocode-section .highlight-line {
-  background-color: rgba(0, 255, 140, 0.12);
-  border-left: 3px solid var(--chip-compressed-glow);
-  font-weight: 700;
-  padding-left: calc(6px - 3px); /* compensate for border */
-}
-
-/* Decode canvas framing (consistent frame) */
-#decode-results-section,
-#decode-results-section canvas,
-#decode-canvas {
-  border: var(--border-std);
-  border-radius: var(--radius-sm);
-  background-color: #0e1114;
-  padding: 6px;
-  display: block;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Responsive: stack on small screens */
-@media (max-width: 900px) {
-  #decode-container .lower-panel {
-    grid-template-columns: 1fr; /* stack vertically */
-  }
-  #decode-dict-section, #decode-process-section {
-    height: auto;
-  }
-  #decode-pseudocode-section {
-    overflow-y: auto; /* allow scroll on small screens */
-  }
+  padding: 3px 8px;
+  margin: 2px 0;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
 
 .pseudocode-line.active-line {
-    background-color: var(--pico-primary-background);
-    color: white;
-    border-radius: 4px;
-    transition: background 0.2s;
+  background-color: var(--chip-bg-compressed);
+  color: white;
+  border-left: 4px solid var(--chip-compressed-glow);
+  font-weight: bold;
+}
+
+.indent-1 { padding-left: 1.5rem; }
+.indent-2 { padding-left: 3rem; }
+
+#decode-results-section {
+  border: var(--border-std);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background-color: var(--bg-panel);
+  margin-top: var(--space-lg);
 }
 
 #decode-canvas {
-    image-rendering: pixelated; /* Verhindert das Verschwimmen */
-    width: 100%;               /* Streckt den Canvas auf Containerbreite */
-    max-width: 500px;
-    height: auto;
-    border: 1px solid #ccc;
+  display: block;
+  image-rendering: pixelated;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: 1px solid #444;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  #decode-container .lower-panel { grid-template-columns: 1fr; }
+  #decode-dict-section, #decode-process-section { height: auto; }
 }
