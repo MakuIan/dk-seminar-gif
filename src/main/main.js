@@ -51,6 +51,8 @@ const appState = {
   running: false,
   paused: false
 };
+const speedRange = document.getElementById("speed-range");
+appState.speed = 1000 - parseInt(speedRange.value) + 10;
 
 // Initiale Sichtbarkeit und Button-States
 decodeContainer.style.display = "none"; // Decoder Container versteckt
@@ -81,6 +83,13 @@ let uploadFileSize = 0;
 // Initialisiere das Wörterbuch im UI
 setWoerterbuchTabelle(Woerterbuch);
 console.log("Initiales Wörterbuch:", Woerterbuch);
+
+speedRange.addEventListener("input", (e) => {
+  const sliderValue = parseInt(e.target.value);
+  const maxValue = parseInt(e.target.max);
+  appState.speed = maxValue - sliderValue + 10;
+  console.log("Speed changed to", appState.speed);
+});
 
 // Dieser Event Listener reagiert auf das Hochladen eines Bildes
 imgInput.addEventListener("change", (event) => {
