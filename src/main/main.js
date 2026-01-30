@@ -52,7 +52,7 @@ const appState = {
   paused: false
 };
 const speedRange = document.getElementById("speed-range");
-appState.speed = 1000 - parseInt(speedRange.value) + 10;
+appState.speed = parseInt(speedRange.max) - parseInt(speedRange.value) + 1;
 
 // Initiale Sichtbarkeit und Button-States
 decodeContainer.style.display = "none"; // Decoder Container versteckt

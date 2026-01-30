@@ -9,8 +9,8 @@
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getDelays = (state) => {
-  const base = state.speed !== undefined ? state.speed : 800;
-  const short = Math.max(20, base * 0.25);
+  const base = state.speed !== undefined ? state.speed : 600;
+  const short = Math.max(1, base * 0.5);
   const pause = 100;
   return { base, short, pause };
 };
@@ -126,7 +126,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
       addDictRowToUI(nextCode, wk);
 
       const newEntryDisplay = `${wk} (${nextCode})`;
-      addProcessRowToUI(w, k, newEntryDisplay, w, true);
+      addProcessRowToUI(w, k, newEntryDisplay, codeOutput, true);
 
       nextCode++;
 

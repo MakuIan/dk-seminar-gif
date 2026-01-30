@@ -47,9 +47,9 @@
               type="range"
               id="speed-range"
               min="0"
-              max="1000"
-              value="200"
-              step="50"
+              max="1500"
+              value="1000"
+              step="10"
               title="Geschwindigkeit anpassen"
             />
           </li>
@@ -92,7 +92,7 @@
           <h2>Farbtabelle</h2>
           <div id="color-palette-grid"></div>
         </section>
-        <div class="lower-panel">
+        <div class="logic-panel">
           <section id="lzw-dict-section">
             <h2>LZW Wörterbuch</h2>
             <div class="table-wrapper">
@@ -107,9 +107,10 @@
               </table>
             </div>
           </section>
-          <section id="lzw-process-section">
+
+          <section id="lzw-code-section">
             <div class="header-with-badge">
-              <h2>LZW Encoder</h2>
+              <h2>LZW Algorithmus</h2>
               <span id="bit-width-badge" class="badge">9 Bit</span>
             </div>
 
@@ -141,23 +142,25 @@
                 Gib Code für W aus (Rest)
               </div>
             </div>
-
-            <h3>LZW Prozess-Schritte</h3>
-            <div class="lzw-process-table-wrapper">
-              <table id="process-table">
-                <thead>
-                  <tr>
-                    <th>letztes Wort (W)</th>
-                    <th>aktuelles Wort (K)</th>
-                    <th>Neuer Eintrag</th>
-                    <th>Code Ausgabe</th>
-                  </tr>
-                </thead>
-                <tbody id="process-body"></tbody>
-              </table>
-            </div>
           </section>
         </div>
+
+        <section id="lzw-trace-section">
+          <h3>LZW Prozess-Schritte</h3>
+          <div class="lzw-process-table-wrapper">
+            <table id="process-table">
+              <thead>
+                <tr>
+                  <th>letztes Wort (W)</th>
+                  <th>aktuelles Wort (K)</th>
+                  <th>Neuer Eintrag</th>
+                  <th>Code Ausgabe</th>
+                </tr>
+              </thead>
+              <tbody id="process-body"></tbody>
+            </table>
+          </div>
+        </section>
         <section id="output-data-stream-section">
           <h2>Output Datenstrom</h2>
           <div id="output-container"></div>
