@@ -214,6 +214,7 @@ function resetUI() {
     chip.classList.remove("active", "processed");
     chip.classList.add("pending");
   });
+  renderGlobalTableUI([]);
 }
 
 /**
@@ -372,7 +373,7 @@ function renderGlobalTableUI(palette) {
   grid.innerHTML = palette
     .map(
       (color, index) =>
-        `<div class="palette-swatch" style="background-color:rgb(${color})"; title="Index: ${index}: rgb(${color}"></div>`
+        `<div class="palette-swatch" style="background-color:rgb(${color})"; title="Index: ${index}: rgb(${color})"></div>`
     )
     .join("");
 }

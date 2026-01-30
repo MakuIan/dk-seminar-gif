@@ -140,7 +140,9 @@ sourceImage.onload = () => {
   globalColorPalette = result.colorPalette;
 
   renderGlobalTableUI(globalColorPalette);
-  addIndexStreamOutputToUI(indexStream, globalColorPalette);
+  setTimeout(() => {
+    addIndexStreamOutputToUI(indexStream, globalColorPalette);
+  }, 10);
 
   console.log("Index Stream:", indexStream);
   console.log("Color Palette:", globalColorPalette);
