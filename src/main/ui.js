@@ -17,10 +17,10 @@
 function setWoerterbuchTabelle(Woerterbuch) {
   dictBody.innerHTML = Object.entries(Woerterbuch)
     .map(([key, value]) => {
-      if (key === "clear") return `<tr><td>CLEAR</td><td>${value}</td></tr>`; // ÄNDERUNG
-      if (key === "end") return `<tr><td>END</td><td>${value}</td></tr>`; // ÄNDERUNG
+      if (key === "clear") return `<tr><td>CLEAR</td><td>${value}</td></tr>`;
+      if (key === "end") return `<tr><td>END</td><td>${value}</td></tr>`;
       // Standardfälle: Sequenz links, Code rechts
-      return `<tr><td>${value}</td><td>${key}</td></tr>`; // ÄNDERUNG (vorher war key links, value rechts)
+      return `<tr><td>${value}</td><td>${key}</td></tr>`;
     })
     .join("");
 }
@@ -32,12 +32,11 @@ function setWoerterbuchTabelle(Woerterbuch) {
  * @param {String} pattern
  */
 function addDictRowToUI(code, pattern) {
-  // ÄNDERUNG: Sonderfälle CLEAR/END prüfen
-  if (pattern === 256) pattern = "CLEAR"; // ÄNDERUNG
-  if (pattern === 257) pattern = "END"; // ÄNDERUNG
+  if (pattern === 256) pattern = "CLEAR";
+  if (pattern === 257) pattern = "END";
 
   const row =
-    '<tr class="new-row"><td>' + pattern + "</td><td>" + code + "</td></tr>"; // ÄNDERUNG (vorher war code links, pattern rechts)
+    '<tr class="new-row"><td>' + pattern + "</td><td>" + code + "</td></tr>";
   const dictBody = document.getElementById("dict-body");
   const tableWrapper = document.querySelector(".table-wrapper");
 
@@ -84,21 +83,20 @@ function addProcessRowToUI(w, k, newEntry, output, isNewEntry) {
 function addOutputToUI(code, symbol) {
   const chip = document.createElement("div");
   chip.classList.add("output-chip");
-  chip.innerText = symbol;
+  chip.setAttribute("data-info", `Sequenz: ${symbol}`);
 
-  // ÄNDERUNG: Wir geben nur noch den Code aus, nicht die Sequenz
   if (code == 256) {
     chip.classList.add("chip-control");
     chip.innerText = "CLEAR"; // ÄNDERUNG
   } else if (code == 257) {
     chip.classList.add("chip-control");
     chip.innerText = "END"; // ÄNDERUNG
-  } else if (code > 257) {
-    chip.classList.add("chip-compressed");
-    chip.innerText = code; // ÄNDERUNG
   } else {
     chip.classList.add("chip-single");
-    chip.innerText = code; // ÄNDERUNG
+    if (code > 257) {
+      chip.style.borderColor = "#888"; // Dezent dunklerer Rand für komprimierte Codes
+    }
+    chip.innerText = code;
   }
 
   outputContainer.appendChild(chip);
@@ -119,9 +117,9 @@ const addIndexStreamOutputToUI = function (indexStream, colorPalette) {
         ? `rgb(${colorPalette[index]})`
         : "#333";
 
-      return `<div id="idx-chip-${i}" class="index-chip pending" style="background-color:${color};" title="${index}">
-                ${index}
-            </div>`;
+      return `<div id="idx-chip-${i}" class="index-chip pending" style="background-color:${color};" data-info="Farb-Index: ${index}">
+          ${index}
+        </div>`;
     })
     .join("");
   indexStreamSection.innerHTML = innerHTML;
@@ -373,7 +371,7 @@ function renderGlobalTableUI(palette) {
   grid.innerHTML = palette
     .map(
       (color, index) =>
-        `<div class="palette-swatch" style="background-color:rgb(${color})"; title="Index: ${index}: rgb(${color})"></div>`
+        `<div class="palette-swatch" style="background-color:rgb(${color});" data-info="Index ${index}: ${color}"></div>`
     )
     .join("");
 }

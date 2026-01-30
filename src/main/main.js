@@ -341,3 +341,20 @@ function initializeWoerterbuch() {
   Woerterbuch["end"] = 257;
   return Woerterbuch;
 }
+
+const tooltipEl = document.getElementById("custom-tooltip");
+document.addEventListener("mouseover", (e) => {
+  const target = e.target.closest("[data-info]");
+
+  if (target) {
+    const text = target.getAttribute("data-info");
+    tooltipEl.innerText = text;
+    const x = e.clientX + 15;
+    const y = e.clientY + 15;
+    tooltipEl.style.left = `${x}px`;
+    tooltipEl.style.top = `${y}px`;
+    tooltipEl.classList.add("visible");
+  } else {
+    tooltipEl.classList.remove("visible");
+  }
+});
