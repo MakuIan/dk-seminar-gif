@@ -1,0 +1,165 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Boadilla}
+\usecolortheme{beaver}
+
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+
+% --- TITEL-DATEN ---
+\title{\textsc{GIF}-Format \& LZW-Kompression}
+\subtitle{Seminar Datenkompression -- WiSe 25/26}
+\author[Kreso \& Braun]{Kristijan Kreso \and Mark Ian Braun}
+\institute[Seminar Datenkompression]{Fachbereich Informatik}
+\date{06. Februar 2026}
+
+\setbeamertemplate{navigation symbols}{}
+
+\newenvironment{slide}{\begin{frame}[fragile, environment=slide]}{\end{frame}}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Gliederung}
+\tableofcontents
+\end{frame}
+
+% --- INHALT ---
+
+% ==========================================
+% SECTION: EINFÜHRUNG
+% ==========================================
+\section{Einführung}
+
+\begin{frame}{Einführung}
+    \begin{itemize}
+        \item \textbf{Graphics Interchange Format} (.gif)
+        \item wurde 1987 vom US-Unternehmen CompuServe entwickelt
+        \item neben XBM ist GIF das erste Standardformat für Bilder im Web
+        \item \textbf{damaliges Ziel:} Bilder so komprimieren, damit sie im Web schnell laden
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Kernmerkmale}
+    \begin{itemize}
+        \item Bitmap-Grafikformat (Rastergrafiken)
+        \item \textbf{Farbtiefe = 8 Bit} also max. 256 verschiedene Farben möglich
+        \item ermöglicht \textit{statische Bilder} oder \textit{Animationen} (Kombination mehrerer Bilder)
+        \item \textbf{verlustfreie} Kompression
+        \item 2 Versionen: „87a“ und „89a“ (Erweiterung)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Historie}
+    \begin{itemize}
+        \item \textbf{Die Anfänge:} Erstes Standard-Bildformat im frühen Web (neben XBM).
+        \item \textbf{Der Abstieg:} JPEG und PNG verdrängten GIF aufgrund besserer Farbtiefe/Transparenz.
+        \item \textbf{Das Comeback (ab ca. 2010):}
+        \begin{itemize}
+            \item Revival durch Social Media, Foren (wie Reddit) und Messenger
+        \end{itemize}
+        \item \textbf{Heute:}
+        \begin{itemize}
+            \item integriert in Facebook, Instagram, WhatsApp
+            \item Standardformat für Memes und Loops
+            \item wird verwendet bei Logos
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% ==========================================
+% SECTION: TECHNISCHE ASPEKTE
+% ==========================================
+\section{Technische Aspekte}
+
+\begin{frame}{Überleitung: Von Pixeln zu Farbindizes}
+    \begin{itemize}
+        \item GIF ist ein Bitmap-basiertes Grafikformat
+        \item Farben werden jedoch nicht als direkte RGB-Werte z.\,B.\ (255,0,0) gespeichert, sondern über \textbf{Farbindizes} aus einer \textbf{Farbpalette} referenziert
+        \item Diese Farbtabelle enthält max. 256 Farben
+        \item Die Bitmap wird in eine \textbf{lineare Sequenz} aus Farbindizes umgewandelt – gelesen zeilenweise von oben links nach unten rechts
+        \item[$\Rightarrow$] \textbf{INPUT für den LZW-Algorithmus}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Technische Details}
+    \textbf{Interner Aufbau:}
+    \begin{itemize}
+        \item \textbf{Header:} GIF87a bzw. GIF89a
+        \item \textbf{Logical Screen Descriptor:} Bilddimensionen
+        \item \textbf{Farbtabelle:} Definition der Paletten-Farben
+        \item \textbf{Bilddaten:} LZW-komprimierte Index-Folge
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{LZW-Kompression}
+    \begin{block}{Kernkonzept}
+        GIF nutzt den \textbf{Lempel-Ziv-Welch (LZW)} Algorithmus zur verlustfreien Kompression.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Das Wörterbuch:} Zentrale Komponente des Algos. Es speichert Sequenzen von Pixel-Indizes und weist ihnen eindeutige, kurze Codes zu.
+        \item \textbf{Ziel:} Lange, sich wiederholende Muster in den Bilddaten durch diese kürzeren Codes aus dem Wörterbuch zu ersetzen, um Speicherplatz zu sparen.
+        \item \textbf{Voraussetzung:} Encoder und Decoder starten mit dem identischen Grundalphabet (Farbindizes 0--255).
+        \item Das Wörterbuch ist nicht statisch, sondern wird während des Prozesses (\textit{on-the-fly}) mit jedem neu entdeckten Muster erweitert.
+    \end{itemize}
+\end{frame}
+
+
+\section{Demonstration}
+\begin{frame}{Demonstration}
+    \begin{center}
+        \Large \textbf{Live-Vorführung unseres Visualisierungstools}
+
+        \vspace{0.5cm}
+        \small (Hier wechseln wir zur Browser-Ansicht)
+    \end{center}
+\end{frame}
+
+\section{Bewertung der Kompressionsgüte}
+% --- SLIDE 1 & 2: DAS QUIZ ---
+\begin{frame}{Interaktives Quiz: Wo arbeitet LZW effizienter?}
+    \centering
+    Welches dieser Bilder lässt sich mit LZW stärker komprimieren?
+\end{frame}
+
+% --- SLIDE 3: DER MERKSATZ ---
+\begin{frame}{Bewertung: Kompressionsgüte}
+    \begin{block}{Merksatz: Die Effizienz von LZW}
+        Der LZW-Algorithmus arbeitet am besten bei vielen sich wiederholenden Sequenzmustern. Je höher die \textbf{Redundanz}, desto höher die Kompressionsrate.
+    \end{block}
+
+    \vspace{0.5cm}
+
+    \begin{itemize}
+        \item \textbf{Stärken (Hohe Kompression):}
+        \begin{itemize}
+            \item Große einfarbige Flächen (Logos, Icons, Tabellen).
+            \item Hier entstehen extrem lange Ketten identischer Indizes $\rightarrow$ kurze Codes im Wörterbuch decken riesige Bildbereiche ab
+        \end{itemize}
+        \item \textbf{Schwächen (Geringe Kompression):}
+        \begin{itemize}
+            \item Komplexe Verläufe, Rauschen oder detailreiche Fotos.
+            \item viele unterschiedliche Farben
+            \item \textbf{Worst-Case:} alle Pixel haben unterschiedliche Farbe
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% --- ABSCHLUSS (Nicht im Inhaltsverzeichnis) ---
+
+\begin{frame}{Literaturverzeichnis}
+    \begin{thebibliography}{10}
+        \beamertemplatebookbibitems
+        \bibitem{Author1} Name, Vorname (Jahr). \textit{Titel des Buches/Artikels}.
+    \end{thebibliography}
+\end{frame}
+
+\begin{frame}
+    \centering
+    \Huge Vielen Dank für eure Aufmerksamkeit!
+\end{frame}
+
+\end{document}
