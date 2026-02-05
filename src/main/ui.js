@@ -110,7 +110,13 @@ function addOutputToUI(code, symbol) {
  * @param {Array} indexStream
  * @param {Array} colorPalette
  */
-const addIndexStreamOutputToUI = function (indexStream, colorPalette) {
+const addIndexStreamOutputToUI = function (
+  indexStream,
+  colorPalette,
+  imageWidth
+) {
+  indexStreamSection.style.gridTemplateColumns = `repeat(${imageWidth}, 20px)`;
+  indexStreamSection.style.width = "100%";
   const innerHTML = indexStream
     .map((index, i) => {
       const color = colorPalette[index]
@@ -146,7 +152,10 @@ function setDecodeWoerterbuchTabelle(Woerterbuch) {
 function addDecodeInputStreamToUI(stream) {
   if (!stream || stream.length === 0) return;
   decodeInputStreamSection.innerHTML = stream
-    .map((code) => `<div class="index-chip decode-chip">${code}</div>`)
+    .map(
+      (code, index) =>
+        `<div id="dec-in-chip-${index}" class="index-chip decode-chip">${code}</div>`
+    )
     .join("");
 }
 
@@ -213,6 +222,7 @@ function resetUI() {
     chip.classList.add("pending");
   });
   renderGlobalTableUI([]);
+  highlightEncoderPseudocode(-1);
 }
 
 /**
@@ -303,15 +313,29 @@ function updateDecoderVars(c, i, j) {
   document.getElementById("var-j").textContent = j;
 }
 
-function addDecodeOutputToUI(sequence) {
+function addDecodeOutputToUI(sequence, colorPalette, imageWidth) {
   const container = document.getElementById("decode-output-container");
-  const codes = sequence.split(" ");
-  codes.forEach((code) => {
-    const chip = document.createElement("div");
-    chip.classList.add("index-chip", "processed");
-    chip.innerText = code;
-    container.appendChild(chip);
-  });
+
+  if (imageWidth && container.style.gridTemplateColumns === "") {
+    container.style.gridTemplateColumns = `repeat(${imageWidth}, 20px)`;
+    container.style.width = "100%";
+  }
+  const indices = sequence.split(" ");
+
+  const html = indices
+    .map((code) => {
+      const idx = parseInt(code);
+      const color =
+        colorPalette && colorPalette[idx]
+          ? `rgb(${colorPalette[idx]})`
+          : "#333";
+
+      return `<div class="decode-output-pixel" style="background-color: ${color};" title="Index: ${idx}">
+              ${idx}
+            </div>`;
+    })
+    .join("");
+  container.insertAdjacentHTML("beforeend", html);
   container.scrollTop = container.scrollHeight;
 }
 
@@ -323,6 +347,29 @@ function addDecodeDictRowToUI(code, pattern) {
     decodeDictBody.closest(".table-wrapper").scrollHeight;
 }
 
+/**
+ * Highlightet den aktuellen Code im Decoder Input Stream
+ */
+function updateDecodeInputHighlight(index) {
+  if (index > 0) {
+    const prev = document.getElementById(`dec-in-chip-${index - 1}`);
+    if (prev) {
+      prev.classList.remove("active");
+      prev.classList.add("processed");
+    }
+  }
+
+  const curr = document.getElementById(`dec-in-chip-${index}`);
+  if (curr) {
+    curr.classList.add("active");
+    // Auto-Scroll
+    curr.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center"
+    });
+  }
+}
 /**
  * Zeichnet Pixel-Sequenzen live auf den Canvas
  * @param {string} sequence - Die Sequenz der Farbindizes (z.B. "0 1 2")
@@ -371,7 +418,9 @@ function renderGlobalTableUI(palette) {
   grid.innerHTML = palette
     .map(
       (color, index) =>
-        `<div class="palette-swatch" style="background-color:rgb(${color});" data-info="Index ${index}: ${color}"></div>`
+        `<div class="palette-swatch" style="background-color:rgb(${color});" data-info="Index ${index}: ${color}">
+          ${index}
+      </div>`
     )
     .join("");
 }

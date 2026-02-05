@@ -181,7 +181,13 @@ async function runLZW(indexStream, Woerterbuch, state) {
  * ============================================================================
  *
  */
-async function runLZWDecoder(inputStream, Woerterbuch, state) {
+async function runLZWDecoder(
+  inputStream,
+  Woerterbuch,
+  state,
+  colorPalette,
+  imageWidth
+) {
   let nextCode = 258;
   window.currentPixelIndex = 0; // Startwert für die Zeichnung
 
@@ -197,11 +203,13 @@ async function runLZWDecoder(inputStream, Woerterbuch, state) {
   // --- INITIALISIERUNG ---
   if (!(await step(1))) return;
   let pointer = 0;
+  updateDecodeInputHighlight(pointer);
   let c = inputStream[pointer];
   // 1. Check: Ist der erste Code ein CLEAR-Code?
   if (c === 256) {
     updateDecoderVars(256, "Init", "CLEAR");
     pointer++;
+    updateDecodeInputHighlight(pointer);
     c = inputStream[pointer]; // Nimm den echten ersten Daten-Code
     if (!(await step(1))) return;
   }
@@ -209,14 +217,16 @@ async function runLZWDecoder(inputStream, Woerterbuch, state) {
   let J = String(Woerterbuch[c]);
   updateDecoderVars(c, "-", J);
   if (!(await step(3))) return;
-  addDecodeOutputToUI(J);
-  drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
+  addDecodeOutputToUI(J, colorPalette, imageWidth);
+  drawPixelsFromSequence(J, colorPalette); // UI-Aufruf
   if (!(await step(4))) return;
   let I = J;
   updateDecoderVars(c, I, J);
   // --- SCHLEIFE ---
   for (let k = pointer + 1; k < inputStream.length; k++) {
     if (!(await step(5))) return;
+
+    updateDecodeInputHighlight(k);
 
     c = inputStream[k];
 
@@ -248,8 +258,8 @@ async function runLZWDecoder(inputStream, Woerterbuch, state) {
     addDecodeDictRowToUI(nextCode, newEntry); // UI-Aufruf
     nextCode++;
     if (!(await step(12))) return;
-    addDecodeOutputToUI(J);
-    drawPixelsFromSequence(J, globalColorPalette); // UI-Aufruf
+    addDecodeOutputToUI(J, colorPalette, imageWidth);
+    drawPixelsFromSequence(J, colorPalette); // UI-Aufruf
     if (!(await step(13))) return;
     I = J;
     updateDecoderVars(c, I, J);
