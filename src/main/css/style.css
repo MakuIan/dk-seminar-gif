@@ -179,7 +179,7 @@ header {
 }
 
 #lzw-dict-section,
-#lzw-process-section {
+#lzw-code-section {
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--radius-md);
@@ -622,7 +622,7 @@ th {
   font-size: 0.8em;
   font-weight: bold;
   border: 1px solid var(--chip-compressed-glow);
-  box-shadow: 0 0 0 5px var(--chip-compressed-glow);
+  box-shadow: 0 0 0 2px var(--chip-compressed-glow);
   transition: transform 0.2s ease;
 }
 
