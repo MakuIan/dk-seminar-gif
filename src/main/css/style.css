@@ -113,7 +113,9 @@ header {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-lg);
   margin-bottom: var(--space-lg);
-  height: 400px;
+  height: auto;
+  min-height: 400px;
+  align-items: start;
 }
 
 .lower-panel {
@@ -193,6 +195,7 @@ header {
 #lzw-dict-section .table-wrapper {
   flex: 1;
   overflow-y: auto;
+  max-height: 420px;
 }
 
 #lzw-dict-section .pseudocode-container {
