@@ -134,6 +134,15 @@ sourceImage.onload = () => {
     alert(
       "Das Bild hat zu viele Farben! Bitte ein Bild mit maximal 256 Farben hochladen!"
     );
+    ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+    imageCanvas.width = 0;
+    imageCanvas.height = 0;
+    indexStream = null;
+    globalColorPalette = null;
+    imgInput.value = "";
+    if (typeof renderGlobalTableUI === "function") renderGlobalTableUI([]);
+    const idxSection = document.getElementById("index-stream-section");
+    if (idxSection) idxSection.innerHTML = "";
     return;
   }
   indexStream = result.indexStream;
@@ -141,7 +150,11 @@ sourceImage.onload = () => {
 
   renderGlobalTableUI(globalColorPalette);
   setTimeout(() => {
-    addIndexStreamOutputToUI(indexStream, globalColorPalette);
+    addIndexStreamOutputToUI(
+      indexStream,
+      globalColorPalette,
+      sourceImage.width
+    );
   }, 10);
 
   console.log("Index Stream:", indexStream);
@@ -323,8 +336,17 @@ startDecodeBtn.addEventListener("click", async () => {
 
   // Pixel-Counter für diesen Durchlauf zurücksetzen
   window.currentPixelIndex = 0;
+  document.getElementById("decode-output-container").innerHTML = "";
+  document.getElementById("decode-output-container").style.gridTemplateColumns =
+    "";
 
-  await runLZWDecoder(encodedOutputStream, decodeWoerterbuch, appState);
+  await runLZWDecoder(
+    encodedOutputStream,
+    decodeWoerterbuch,
+    appState,
+    globalColorPalette,
+    sourceImage.width
+  );
 
   appState.decoding = false;
   updateButtonState("finished");
