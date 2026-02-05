@@ -58,9 +58,8 @@ function addDictRowToUI(code, pattern) {
 function addProcessRowToUI(w, k, newEntry, output, isNewEntry) {
   const rowClass = isNewEntry ? "process-step-new" : "process-step-found";
   const entryDisplay = isNewEntry ? newEntry : "-";
-  const outputDisplay = output
-    ? `<span class="chip-single">${output}</span>`
-    : "";
+  const outputDisplay =
+    output || output === 0 ? `<span class="chip-single">${output}</span>` : "";
   const rowHTML = `<tr class="new-row ${rowClass}">
         <td>${w}</td>
         <td>${k}</td>
