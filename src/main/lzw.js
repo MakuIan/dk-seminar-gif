@@ -161,7 +161,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
     let codeOutput = Woerterbuch[w];
     outputStream.push(codeOutput);
     addOutputToUI(codeOutput, w);
-    // addProcessRowToUI(w, "EOF", "-", codeOutput, false);
+    addProcessRowToUI(w, "EOF", "-", codeOutput, false);
     await sleep(getDelays(state).short);
   }
 
