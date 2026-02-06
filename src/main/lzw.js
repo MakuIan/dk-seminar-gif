@@ -15,6 +15,22 @@ const getDelays = (state) => {
   return { base, short, pause };
 };
 /**
+ * Wartet 'ms' Millisekunden und prüft danach (und währenddessen), ob pausiert wurde.
+ * Gibt 'false' zurück, wenn der Prozess abgebrochen wurde (Reset), sonst 'true'.
+ */
+async function sleepAndCheckPause(ms, state) {
+  await sleep(ms);
+
+  while (state.paused) {
+    await sleep(getDelays(state).pause);
+    if (!state.running) return false;
+  }
+
+  if (!state.running) return false;
+
+  return true;
+}
+/**
  * Da Canvas ImageData nur rohe RGBA-Werte liefert, müssen die Daten in Farbindizes umgewandelt werden.
  * Geht nur bis zu 256 Farben (GIF Limit)
  *
@@ -76,7 +92,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
   updateIndexStreamHighlight(0);
   addProcessRowToUI("-", w, "-", "-", false);
 
-  await sleep(getDelays(state).short);
+  if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
 
   let currentCodeSize = 9;
   let nextBump = 512;
@@ -90,36 +106,36 @@ async function runLZW(indexStream, Woerterbuch, state) {
     highlightEncoderPseudocode(2);
 
     while (state.paused) {
-      await sleep(getDelays(state).pause);
+      if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
       if (!state.running) return;
     }
 
     highlightEncoderPseudocode(3);
     updateIndexStreamHighlight(i);
 
-    await sleep(getDelays(state).short);
+    if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
 
     const k = String(indexStream[i]);
     const wk = w + " " + k;
 
     highlightEncoderPseudocode(4);
-    await sleep(getDelays(state).short);
+    if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
 
     if (wk in Woerterbuch) {
       highlightEncoderPseudocode(5);
       addProcessRowToUI(w, k, "-", "-", false);
       w = wk;
 
-      await sleep(getDelays(state).short);
+      if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
     } else {
       highlightEncoderPseudocode(6);
-      await sleep(getDelays(state).short);
+      if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
 
       let codeOutput = Woerterbuch[w];
       outputStream.push(codeOutput);
       highlightEncoderPseudocode(7);
       addOutputToUI(codeOutput, w);
-      await sleep(getDelays(state).short);
+      if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
 
       highlightEncoderPseudocode(8);
       Woerterbuch[wk] = nextCode;
@@ -148,13 +164,13 @@ async function runLZW(indexStream, Woerterbuch, state) {
         currentCodeSize = 9;
         nextBump = 512;
         updateBitWidthUI(9);
-        await sleep(getDelays(state).base);
+        if (!(await sleepAndCheckPause(getDelays(state).base, state))) return;
       }
 
       highlightEncoderPseudocode(9);
       w = String(k);
     }
-    await sleep(getDelays(state).base);
+    if (!(await sleepAndCheckPause(getDelays(state).base, state))) return;
   }
   highlightEncoderPseudocode(10);
   if (w !== "") {
@@ -162,7 +178,7 @@ async function runLZW(indexStream, Woerterbuch, state) {
     outputStream.push(codeOutput);
     addOutputToUI(codeOutput, w);
     addProcessRowToUI(w, "EOF", "-", codeOutput, false);
-    await sleep(getDelays(state).short);
+    if (!(await sleepAndCheckPause(getDelays(state).short, state))) return;
   }
 
   outputStream.push(Woerterbuch["end"]);
