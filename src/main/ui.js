@@ -361,12 +361,6 @@ function updateDecodeInputHighlight(index) {
   const curr = document.getElementById(`dec-in-chip-${index}`);
   if (curr) {
     curr.classList.add("active");
-    // Auto-Scroll
-    curr.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center"
-    });
   }
 }
 /**
