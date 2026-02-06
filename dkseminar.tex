@@ -5,6 +5,20 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[german]{babel}
+\usepackage{graphicx} %Paket um Graphikdateien einzubinden
+\usepackage{float} %Paket um Gleitobjekte zu benutzen
+\usepackage{wrapfig} % Paket um Graphiken von Text umflossen einzubinden
+\usepackage{subcaption} %Paket um mehrere Graphiken in einer darzustellen
+\usepackage{xcolor}
+\usepackage[style=numeric, sorting=none, backend=biber]{biblatex}
+\addbibresource{quellen.bib}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\hypersetup{ %Textinterne Links in blau, url-Links in rot
+	colorlinks,
+	linkcolor={blue},
+	urlcolor={red}
+}
 
 % --- TITEL-DATEN ---
 \title{\textsc{GIF}-Format \& LZW-Kompression}
@@ -18,6 +32,7 @@
 \newenvironment{slide}{\begin{frame}[fragile, environment=slide]}{\end{frame}}
 
 \begin{document}
+\nocite{*}
 
 \begin{frame}
 \titlepage
@@ -47,8 +62,8 @@
     \begin{itemize}
         \item Bitmap-Grafikformat (Rastergrafiken)
         \item \textbf{Farbtiefe = 8 Bit} also max. 256 verschiedene Farben möglich
-        \item ermöglicht \textit{statische Bilder} oder \textit{Animationen} (Kombination mehrerer Bilder)
         \item \textbf{verlustfreie} Kompression
+        \item ermöglicht \textit{statische Bilder} oder \textit{Animationen} (Kombination mehrerer Bilder)
         \item 2 Versionen: „87a“ und „89a“ (Erweiterung)
     \end{itemize}
 \end{frame}
@@ -120,10 +135,42 @@
 
 \section{Bewertung der Kompressionsgüte}
 % --- SLIDE 1 & 2: DAS QUIZ ---
-\begin{frame}{Interaktives Quiz: Wo arbeitet LZW effizienter?}
+\begin{frame}{QUIZ}
     \centering
-    Welches dieser Bilder lässt sich mit LZW stärker komprimieren?
+    Welches dieser Bilder lässt sich mit LZW besser komprimieren?
+
+\vspace{0.5cm}
+
+\begin{figure}
+ \centering
+ % Linkes Bild
+ \begin{subfigure}[b]{0.45\textwidth}
+  \centering
+  % width=linewidth passt es an die 0.45 Spalte an
+  % height begrenzt die Höhe, damit Text darunter passt
+  \includegraphics[width=\linewidth, height=0.5\textheight, keepaspectratio]{l1.jpg}
+  \caption{Bild A}
+ \end{subfigure}
+ \hfill % Schiebt die Bilder maximal auseinander
+ % Rechtes Bild
+ \begin{subfigure}[b]{0.45\textwidth}
+  \centering
+  \includegraphics[width=\linewidth, height=0.5\textheight, keepaspectratio]{r1.png}
+  \caption{Bild B}
+ \end{subfigure}
+\end{figure}
+
+\vspace{0.5cm}
+
+% --- HIER KOMMT DER KLICK ---
+    \pause
+
+    \begin{flushright}
+        \textbf{\large \textcolor{green!60!black}{KORREKT: Bild B}}
+    \end{flushright}
+
 \end{frame}
+
 
 % --- SLIDE 3: DER MERKSATZ ---
 \begin{frame}{Bewertung: Kompressionsgüte}
@@ -150,11 +197,9 @@
 
 % --- ABSCHLUSS (Nicht im Inhaltsverzeichnis) ---
 
-\begin{frame}{Literaturverzeichnis}
-    \begin{thebibliography}{10}
-        \beamertemplatebookbibitems
-        \bibitem{Author1} Name, Vorname (Jahr). \textit{Titel des Buches/Artikels}.
-    \end{thebibliography}
+\section*{Quellen}
+\begin{frame}[allowframebreaks]{Qullen}
+    \printbibliography
 \end{frame}
 
 \begin{frame}
