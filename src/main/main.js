@@ -117,6 +117,8 @@ imgInput.addEventListener("change", (event) => {
 
 // Dieser Event Listener reagiert, wenn das Bild geladen wurde
 sourceImage.onload = () => {
+  const imgContainer = document.getElementById("image-container");
+  imgContainer.style.display = "flex";
   imageCanvas.width = sourceImage.width;
   imageCanvas.height = sourceImage.height;
 

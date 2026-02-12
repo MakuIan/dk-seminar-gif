@@ -280,14 +280,24 @@ th {
 
 .canvas-wrapper {
   position: relative;
-  display: inline-block;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.2);
   border: var(--border-std);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  box-sizing: border-box;
 }
-
 #image-canvas {
   display: block;
   image-rendering: pixelated;
+  height: 300px;
+  width: auto;
+  max-width: 100%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 /* --- Output Chips Styling --- */
@@ -350,8 +360,8 @@ th {
 #index-stream-section {
   display: grid;
   flex-wrap: wrap;
-  justify-content: start;
-  align-content: start;
+  justify-content: safe center;
+  align-content: safe center;
   gap: 1px;
   padding: var(--space-xs);
   max-height: 500px;
