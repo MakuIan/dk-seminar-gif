@@ -185,6 +185,7 @@ header {
   background-color: var(--bg-panel);
   border: var(--border-std);
   border-radius: var(--radius-md);
+  color: var(--text-primary);
   padding: var(--space-md);
   height: 100%;
   display: flex;
@@ -581,6 +582,9 @@ th {
 }
 .indent-2 {
   padding-left: 3rem;
+}
+.indent-3 {
+  padding-left: 4.5rem;
 }
 
 #decode-results-section {

@@ -45,32 +45,6 @@ function addDictRowToUI(code, pattern) {
     tableWrapper.scrollTop = tableWrapper.scrollHeight;
   }
 }
-/**
- * Fügt eine neue Zeile in die Process Tabelle hinzu
- * Ist aufgerufen in runLZW
- *
- * @param{String} w
- * @param{String} k
- * @param{String} newEntry
- * @param{String} output
- * @param{boolean} isNewEntry
- */
-function addProcessRowToUI(w, k, newEntry, output, isNewEntry) {
-  const rowClass = isNewEntry ? "process-step-new" : "process-step-found";
-  const entryDisplay = isNewEntry ? newEntry : "-";
-  const outputDisplay =
-    output || output === 0 ? `<span class="chip-single">${output}</span>` : "";
-  const rowHTML = `<tr class="new-row ${rowClass}">
-        <td>${w}</td>
-        <td>${k}</td>
-        <td>${entryDisplay}</td>
-        <td>${outputDisplay}</td>
-    </tr>`;
-
-  processTableBody.insertAdjacentHTML("beforeend", rowHTML);
-  tableWrapperLzwProcessTableWrapper.scrollTop =
-    tableWrapperLzwProcessTableWrapper.scrollHeight;
-}
 
 /**
  * Fügt einen neuen Output-Chip im UI hinzu
@@ -181,10 +155,10 @@ function updateIndexStreamHighlight(currentIndex) {
 
 /**
  * Aktualisert States der Buttons
- *
- * @param {*} state
+ * Verhindert, dass Reset gedrückt werden kann, wenn bereits alles resettet ist.
  */
 function updateButtonState(state) {
+  // Zuerst alles sperren
   startBtn.disabled = true;
   pauseBtn.disabled = true;
   resumeBtn.disabled = true;
@@ -193,6 +167,7 @@ function updateButtonState(state) {
   switch (state) {
     case "idle":
       startBtn.disabled = false;
+      resetBtn.disabled = true; // Im Idle-Zustand macht ein Reset keinen Sinn!
       break;
     case "running":
       pauseBtn.disabled = false;
@@ -203,8 +178,8 @@ function updateButtonState(state) {
       resetBtn.disabled = false;
       break;
     case "finished":
-      // Neue State Logik, erst Reset nötig, um sauber neuzustarten
       resetBtn.disabled = false;
+      // Start ist gesperrt, bis Reset gedrückt wurde
       break;
   }
 }
@@ -445,4 +420,51 @@ function highlightEncoderPseudocode(lineNr) {
     `#encoder-pseudocode-section .pseudocode-line[data-eline="${lineNr}"]`
   );
   if (active) active.classList.add("active-line");
+}
+
+/**
+ * NEU: Bereitet eine Tabellenzeile mit Platzhaltern vor
+ * Ist aufgerufen in runLZW
+ * * @returns {string} Eine eindeutige ID für die Zeile
+ */
+function prepareProcessRow() {
+  const id = "row-" + Math.random().toString(36).substr(2, 9);
+  
+  const rowHTML = `
+    <tr id="${id}" class="new-row">
+      <td class="cell-w"></td>
+      <td class="cell-k"></td>
+      <td class="cell-entry"></td>
+      <td class="cell-output"></td>
+    </tr>`;
+    
+  processTableBody.insertAdjacentHTML("beforeend", rowHTML);
+  
+  if (tableWrapperLzwProcessTableWrapper) {
+    tableWrapperLzwProcessTableWrapper.scrollTop = tableWrapperLzwProcessTableWrapper.scrollHeight;
+  }
+  return id;
+}
+
+/**
+ * NEU: Aktualisiert spezifische Zellen einer Zeile
+ * Ist aufgerufen in runLZW
+ * * @param {string} id - Die ID aus prepareProcessRow
+ * @param {Object} data - Die zu setzenden Werte {w, k, entry, output}
+ */
+function updateProcessRow(id, data) {
+  const row = document.getElementById(id);
+  if (!row) return;
+
+  if (data.w !== undefined) row.querySelector(".cell-w").innerText = data.w;
+  if (data.k !== undefined) row.querySelector(".cell-k").innerText = data.k;
+  if (data.entry !== undefined) row.querySelector(".cell-entry").innerText = data.entry;
+  if (data.output !== undefined) {
+    const outCell = row.querySelector(".cell-output");
+    if (data.output === "-" || data.output === "" || data.output === null) {
+      outCell.innerText = "-";
+    } else {
+      outCell.innerHTML = `<span class="chip-single">${data.output}</span>`;
+    }
+  }
 }

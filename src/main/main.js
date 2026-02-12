@@ -240,27 +240,36 @@ resumeBtn.addEventListener("click", () => {
   console.log("Resuming");
 });
 
-// EventListener fuers Zuruecksetzen des Algos
+// EventListener fürs Zurücksetzen des Algos
 resetBtn.addEventListener("click", () => {
+  // Sofortige Sperre, um Mehrfachklicks zu verhindern
+  resetBtn.disabled = true; 
+
   appState.running = false;
+  appState.decoding = false;
   appState.paused = false;
-  appState.decoding = false; // Stoppt auch Decoder-Prozess
+
+  // UI-Variablen sofort auf "leer" setzen (Wichtig!)
+  if (typeof updateDecoderVars === "function") {
+    updateDecoderVars("–", "–", "–");
+  }
 
   resetUI();
-  updateButtonState("idle"); // Hier wird startBtn wieder auf false (also klickbar) gesetzt
+  updateButtonState("idle");
 
   // === Decoder UI zurücksetzen ===
   decodeContainer.style.display = "none";
   showDecodeBtn.disabled = true;
-  startDecodeBtn.disabled = false; // Wieder bereit für nächsten Lauf
+  startDecodeBtn.disabled = false;
   decodeInputStreamSection.innerHTML = "";
   decodeDictBody.innerHTML = "";
   encodedOutputStream = null;
 
-  const decodeOutputContainer = document.getElementById(
-    "decode-output-container"
-  );
-  if (decodeOutputContainer) decodeOutputContainer.innerHTML = "";
+  const decodeOutputContainer = document.getElementById("decode-output-container");
+  if (decodeOutputContainer) {
+    decodeOutputContainer.innerHTML = "";
+    decodeOutputContainer.style.gridTemplateColumns = "";
+  }
 
   // Bild und Canvas komplett löschen
   sourceImage.src = "";
@@ -283,17 +292,21 @@ resetBtn.addEventListener("click", () => {
   indexStreamSection.innerHTML = "";
   imgInput.value = "";
   imgInput.disabled = false;
+  window.currentPixelIndex = 0;
+
+  // Highlights löschen
+  if (typeof highlightEncoderPseudocode === "function") highlightEncoderPseudocode(-1);
+  if (typeof highlightPseudocode === "function") highlightPseudocode(-1);
 
   // Wörterbuch didaktisch zurücksetzen
   const initialWoerterbuch = initializeWoerterbuch();
   setWoerterbuchTabelle(initialWoerterbuch);
 
-  // Ergebnisse + Kompressionsstatistik löschen
   outputContainer.innerHTML = "";
   processTableBody.innerHTML = "";
   resultsSection.innerHTML = "";
-
-  // Start-Button explizit freigeben (sicher ist sicher)
+  
+  // Start-Button explizit freigeben
   startBtn.disabled = false;
 });
 
@@ -309,37 +322,39 @@ showDecodeBtn.addEventListener("click", () => {
   addDecodeInputStreamToUI(encodedOutputStream); // === NEU ===
 });
 
-// Start-Button für Dekodierung (Platzhalter)
+// Start-Button für Dekodierung
 startDecodeBtn.addEventListener("click", async () => {
   if (!encodedOutputStream || encodedOutputStream.length === 0) {
     alert("Keine kodierten Daten vorhanden!");
     return;
   }
 
-  // Header Buttons reaktivieren für den Decoder
   appState.decoding = true;
   appState.paused = false;
-  updateButtonState("running"); // Nutzt die vorhandene Funktion
+  updateButtonState("running"); 
 
   startDecodeBtn.disabled = true;
+  imgInput.disabled = true; // Auch hier Upload sperren
 
-  // Decoder starten
   const decodeWoerterbuch = initializeWoerterbuch();
   setDecodeWoerterbuchTabelle(decodeWoerterbuch);
 
-  // WICHTIG: Canvas vorbereiten
   const decodeCanvas = document.getElementById("decode-canvas");
-  decodeCanvas.width = sourceImage.width;
-  decodeCanvas.height = sourceImage.height;
-  const decodeCtx = decodeCanvas.getContext("2d");
-  decodeCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+  if (decodeCanvas) {
+    decodeCanvas.width = sourceImage.width;
+    decodeCanvas.height = sourceImage.height;
+    const decodeCtx = decodeCanvas.getContext("2d");
+    decodeCtx.clearRect(0, 0, decodeCanvas.width, decodeCanvas.height);
+  }
 
-  // Pixel-Counter für diesen Durchlauf zurücksetzen
   window.currentPixelIndex = 0;
-  document.getElementById("decode-output-container").innerHTML = "";
-  document.getElementById("decode-output-container").style.gridTemplateColumns =
-    "";
+  const decodeOutputContainer = document.getElementById("decode-output-container");
+  if (decodeOutputContainer) {
+    decodeOutputContainer.innerHTML = "";
+    decodeOutputContainer.style.gridTemplateColumns = "";
+  }
 
+  // Decoder aufrufen
   await runLZWDecoder(
     encodedOutputStream,
     decodeWoerterbuch,
@@ -348,8 +363,11 @@ startDecodeBtn.addEventListener("click", async () => {
     sourceImage.width
   );
 
-  appState.decoding = false;
-  updateButtonState("finished");
+  // Nach dem Ende (egal ob Erfolg oder Abbruch durch Reset)
+  if (appState.decoding) {
+     appState.decoding = false;
+     updateButtonState("finished");
+  }
 });
 
 /**
@@ -365,18 +383,20 @@ function initializeWoerterbuch() {
 }
 
 const tooltipEl = document.getElementById("custom-tooltip");
-document.addEventListener("mouseover", (e) => {
-  const target = e.target.closest("[data-info]");
+if (tooltipEl) {
+  document.addEventListener("mouseover", (e) => {
+    const target = e.target.closest("[data-info]");
 
-  if (target) {
-    const text = target.getAttribute("data-info");
-    tooltipEl.innerText = text;
-    const x = e.clientX + 15;
-    const y = e.clientY + 15;
-    tooltipEl.style.left = `${x}px`;
-    tooltipEl.style.top = `${y}px`;
-    tooltipEl.classList.add("visible");
-  } else {
-    tooltipEl.classList.remove("visible");
-  }
-});
+    if (target) {
+      const text = target.getAttribute("data-info");
+      tooltipEl.innerText = text;
+      const x = e.clientX + 15;
+      const y = e.clientY + 15;
+      tooltipEl.style.left = `${x}px`;
+      tooltipEl.style.top = `${y}px`;
+      tooltipEl.classList.add("visible");
+    } else {
+      tooltipEl.classList.remove("visible");
+    }
+  });
+}

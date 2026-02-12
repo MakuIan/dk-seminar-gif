@@ -116,30 +116,33 @@
 
             <div id="encoder-pseudocode-section" class="pseudocode-container">
               <div class="pseudocode-line" data-eline="1">
-                W := Lies ersten Pixel
+                LW := ""
               </div>
               <div class="pseudocode-line" data-eline="2">
-                Solange noch Pixel K vorhanden:
+                Solange noch Zeichen vorhanden:
               </div>
               <div class="pseudocode-line indent-1" data-eline="3">
-                Lies nächsten Pixel K
+                Z := lies nächstes Zeichen
               </div>
               <div class="pseudocode-line indent-1" data-eline="4">
-                Wenn (W + K) im Wörterbuch?
+                Wenn (LW + Z) im Wörterbuch:
               </div>
               <div class="pseudocode-line indent-2" data-eline="5">
-                W := W + K
+                LW := LW + Z
               </div>
               <div class="pseudocode-line indent-1" data-eline="6">Sonst:</div>
               <div class="pseudocode-line indent-2" data-eline="7">
-                Gib Code für W aus
+                Füge (LW + Z) ins Wörterbuch ein
               </div>
               <div class="pseudocode-line indent-2" data-eline="8">
-                Füge (W + K) ins Wörterbuch
+                Gib Code(LW) aus
               </div>
-              <div class="pseudocode-line indent-2" data-eline="9">W := K</div>
+              <div class="pseudocode-line indent-2" data-eline="9">LW := Z</div>
               <div class="pseudocode-line" data-eline="10">
-                Gib Code für W aus (Rest)
+                Wenn LW != "":
+              </div>
+              <div class="pseudocode-line indent-1" data-eline="11">
+                Gib Code(LW) aus
               </div>
             </div>
           </section>
@@ -151,8 +154,8 @@
             <table id="process-table">
               <thead>
                 <tr>
-                  <th>letztes Wort (W)</th>
-                  <th>aktuelles Wort (K)</th>
+                  <th>letztes Wort (LW)</th>
+                  <th>aktuelles Zeichen (Z)</th>
                   <th>Neuer Eintrag</th>
                   <th>Code Ausgabe</th>
                 </tr>
@@ -273,7 +276,6 @@
 
     <div id="custom-tooltip" class="custom-tooltip"></div>
 
-    <script src="ui.js"></script>
     <script src="ui.js"></script>
     <script src="main.js"></script>
     <script src="lzw.js"></script>
