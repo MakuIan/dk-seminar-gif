@@ -243,7 +243,7 @@ resumeBtn.addEventListener("click", () => {
 // EventListener fürs Zurücksetzen des Algos
 resetBtn.addEventListener("click", () => {
   // Sofortige Sperre, um Mehrfachklicks zu verhindern
-  resetBtn.disabled = true; 
+  resetBtn.disabled = true;
 
   appState.running = false;
   appState.decoding = false;
@@ -265,7 +265,9 @@ resetBtn.addEventListener("click", () => {
   decodeDictBody.innerHTML = "";
   encodedOutputStream = null;
 
-  const decodeOutputContainer = document.getElementById("decode-output-container");
+  const decodeOutputContainer = document.getElementById(
+    "decode-output-container"
+  );
   if (decodeOutputContainer) {
     decodeOutputContainer.innerHTML = "";
     decodeOutputContainer.style.gridTemplateColumns = "";
@@ -295,7 +297,8 @@ resetBtn.addEventListener("click", () => {
   window.currentPixelIndex = 0;
 
   // Highlights löschen
-  if (typeof highlightEncoderPseudocode === "function") highlightEncoderPseudocode(-1);
+  if (typeof highlightEncoderPseudocode === "function")
+    highlightEncoderPseudocode(-1);
   if (typeof highlightPseudocode === "function") highlightPseudocode(-1);
 
   // Wörterbuch didaktisch zurücksetzen
@@ -305,7 +308,7 @@ resetBtn.addEventListener("click", () => {
   outputContainer.innerHTML = "";
   processTableBody.innerHTML = "";
   resultsSection.innerHTML = "";
-  
+
   // Start-Button explizit freigeben
   startBtn.disabled = false;
 });
@@ -331,7 +334,7 @@ startDecodeBtn.addEventListener("click", async () => {
 
   appState.decoding = true;
   appState.paused = false;
-  updateButtonState("running"); 
+  updateButtonState("running");
 
   startDecodeBtn.disabled = true;
   imgInput.disabled = true; // Auch hier Upload sperren
@@ -348,7 +351,9 @@ startDecodeBtn.addEventListener("click", async () => {
   }
 
   window.currentPixelIndex = 0;
-  const decodeOutputContainer = document.getElementById("decode-output-container");
+  const decodeOutputContainer = document.getElementById(
+    "decode-output-container"
+  );
   if (decodeOutputContainer) {
     decodeOutputContainer.innerHTML = "";
     decodeOutputContainer.style.gridTemplateColumns = "";
@@ -365,8 +370,8 @@ startDecodeBtn.addEventListener("click", async () => {
 
   // Nach dem Ende (egal ob Erfolg oder Abbruch durch Reset)
   if (appState.decoding) {
-     appState.decoding = false;
-     updateButtonState("finished");
+    appState.decoding = false;
+    updateButtonState("finished");
   }
 });
 
@@ -400,3 +405,25 @@ if (tooltipEl) {
     }
   });
 }
+
+/* 
+Keyboard Controls
+*/
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Space" || e.key === " ") {
+    e.preventDefault();
+    if (appState.running || appState.decoding) {
+      if (appState.paused) {
+        //Fortsetzen
+        appState.paused = false;
+        updateButtonState("running");
+        console.log("Resuming");
+      } else {
+        //Pause
+        appState.paused = true;
+        updateButtonState("paused");
+        console.log("Paused");
+      }
+    }
+  }
+});
