@@ -1,0 +1,13 @@
+\babel@toc {german}{}\relax 
+\contentsline {section}{\numberline {1}Thema}{2}{section.1}%
+\contentsline {section}{\numberline {2}Theoretische Grundlagen}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Hintergründe zur 8-Bit Farbtiefe}{2}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Verfahren-Beschreibung}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Initialisierung und Steuerzeichen}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Der Codierungs-Algorithmus}{2}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Variable Bitbreite und Reset}{3}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Anwendungsgebiet}{3}{section.4}%
+\contentsline {section}{\numberline {5}Qualitätsbewertung über das Verfahren}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Fallstudie: Grafik vs. Fotografie}{3}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Stärken und Schwächen (Worst-Case)}{4}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Referenzen}{4}{section.6}%

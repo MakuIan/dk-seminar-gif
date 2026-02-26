@@ -1,0 +1,118 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{amsmath} % <--- ADD THIS LINE TO FIX THE ERROR
+\geometry{a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+\begin{document}
+	
+	% --- TITELBLATT ---
+	\begin{titlepage}
+		\centering
+		\vspace*{2cm}
+		{\Huge \textbf{GIF-Format \& LZW-Kompression} \par}
+		\vspace{1cm}
+		{\Large \textbf{PROJEKT Mitglieder:} \par}
+		\Large{Kristijan Kreso} \par
+		\Large{Mark Ian Braun} \par
+		\vspace{2cm}
+		{\Large \textbf{Aktuelle Themen der Angewandten Informatik: Datenkompression} \par}
+		\vspace{0.5cm}
+		Johann Wolfgang Goethe-Universität Frankfurt am Main \\
+		FB Informatik und Mathematik \\
+		Institut für Informatik - Graphische Datenverarbeitung \\
+		\vspace{0.5cm}
+		Dozent: Dr.-Ing. The Anh Vuong
+		\vspace{2cm}
+		
+		\begin{tabular}{|l|l|}
+			\hline
+			\textbf{Erstellt am} & \today \\ \hline
+			\textbf{Status} & fertig gestellt / Abgeben \\ \hline
+		\end{tabular}
+		\vfill
+	\end{titlepage}
+	
+	% --- INHALTSVERZEICHNIS ---
+	\tableofcontents
+	\newpage
+	
+	% --- KAPITEL ---
+	
+	\section{Thema}
+	Das Thema dieser Ausarbeitung ist das GIF-Format in Kombination mit der LZW-Kompression.
+	
+	\section{Theoretische Grundlagen}
+	Das Graphics Interchange Format (.gif) ist ein Bitmap-Grafikformat, welches 1987 vom US-Unternehmen CompuServe entwickelt wurde. Neben XBM war es das erste Standardformat für Bilder im Web. Es zeichnet sich durch eine Farbtiefe von 8 Bit aus, was maximal 256 verschiedene Farben ermöglicht. Die Kompression des Formats erfolgt verlustfrei. Eine Besonderheit von GIF ist, dass es sowohl statische Bilder als auch Animationen (durch die Kombination mehrerer Bilder) ermöglicht. Es existieren zwei Versionen des Formats, 87a und die Erweiterung 89a.
+	
+	\subsection{Hintergründe zur 8-Bit Farbtiefe}
+	\begin{enumerate}
+		\item \textbf{Speichereffizienz:} In den 80er Jahren war Arbeitsspeicher extrem kostspielig. Ein 24-Bit-Bild  benötigt pro Pixel dreimal so viel Speicher wie ein 8-Bit-Bild. Durch die Verwendung einer indizierten Farbtabelle konnte die Datenmenge bereits vor der eigentlichen Kompression schon reduziert werden.
+		\item \textbf{Bandbreite:} Die Übertragungsraten waren damals , oft bedingt durch langsame Modems, sehr gering. Die Reduzierung der Dateigröße ermöglichte es Bilder innerhalb akzeptabler Zeiträume über das Netzwerk laden zu können.
+		\item \textbf{Hardware-Limitierungen:} Die meisten Grafikkarten und Monitore der damaligen Ära konnten nicht mehr als 256 Farben gleichzeitig darstellen.
+	\end{enumerate}
+	
+	Im Gegensatz zu anderen Formaten werden Farben nicht als direkte RGB-Werte (z.\,B. 255, 0, 0) gespeichert. Stattdessen werden sie über Farbindizes aus einer Farbpalette referenziert. Die Bitmap wird zeilenweise in eine lineare Sequenz aus Farbindizes umgewandelt. Der interne Aufbau besteht aus Header, Logical Screen Descriptor, Farbtabelle und den LZW-komprimierten Bilddaten.
+	
+	\section{Verfahren-Beschreibung}
+	Die Bildkompression bei GIF basiert auf einer spezifischen Implementierung des Lempel-Ziv-Welch (LZW) Algorithmus.
+	
+	\subsection{Initialisierung und Steuerzeichen}
+	Bevor der Codierungsprozess beginnt, wird das Wörterbuch mi 258 Werten initialisiert.
+	
+	\begin{itemize}
+		\item {Farben 0 - 255}
+		\item {Clear Code : 256}
+		\item{End Code: 257 }
+	\end{itemize}
+	
+	
+	
+	\subsection{Der Codierungs-Algorithmus}
+	Der Encoder liest die Pixel-Indizes des Bildes nacheinander ein.
+	\begin{enumerate}
+		\item Der \textbf{Clear Code} wird als erstes Element in den Ergebnis-Stream geschrieben.
+		\item Die aktuelle Sequenz $LW$ wird leer initialisiert.
+		\item Für jeden Index $Z$ in der Eingabefolge:
+		\begin{itemize}
+			\item Bilde eine neue Test-Sequenz $LW+Z$.
+			\item Falls $LW+Z$ bereits im Wörterbuch existiert: Setze $LW = LW+Z$.
+			\item Falls $LW+Z$ \textbf{nicht} im Wörterbuch existiert:
+			\begin{enumerate}
+				\item Schreibe den Code für $LW$ in den Ergebnis-Stream.
+				\item Füge $LW+Z$ mit dem nächsten freien Code (`nextCode`) in das Wörterbuch ein.
+				\item Prüfe, ob die aktuelle Code-Bitbreite erhöht werden muss.
+				\item Setze $LW = Z$.
+			\end{enumerate}
+		\end{itemize}
+		\item Nach Verarbeiten aller Pixel wird der Code für das verbleibende $LW$ sowie der {END-Code} ausgegeben.
+	\end{enumerate}
+	
+	\subsection{Variable Bitbreite und Reset}
+	Die GIF-Spezifikation nutzt variable Bitbreiten für die Codes (9 bis 12 Bit). Sobald der `nextCode` den Wert übersteigt, der mit der aktuellen Bitbreite darstellbar ist ($2^{\text{bitBreite}}$), wird die Bitbreite um 1 erhöht. Erreicht das Wörterbuch die maximale Größe von 4096 Einträgen (12 Bit), wird ein \textbf{Clear Code} ausgegeben, das Wörterbuch auf den Grundzustand zurückgesetzt und die Bitbreite wieder auf den Startwert (9 bit) setzt.
+	
+	\section{Anwendungsgebiet}
+	Das ursprüngliche Ziel von GIF bestand darin, Bilder so zu komprimieren, dass sie im frühen World Wide Web möglichst schnell laden.
+	
+\section{Qualitätsbewertung über das Verfahren}
+Die Bewertung der Kompressionsgüte von GIF lässt sich auf einen zentralen Merksatz reduzieren: \textbf{Der LZW-Algorithmus arbeitet am besten bei vielen sich wiederholenden Sequenzmustern.} Je höher die Redundanz innerhalb der Bilddaten, desto effektiver ist die Kompressionsrate.
+
+\subsection{Fallstudie: Grafik vs. Fotografie}
+In der begleitenden Präsentation wurde dies anhand eines Vergleichsquiz verdeutlicht. Hierbei standen zwei Bildtypen gegenüber:
+\begin{itemize}
+	\item \textbf{Bild A (Detailreiches Foto):} Eine Landschaftsaufnahme mit komplexen Verläufen, Rauschen und vielen verschiedenen Farben. Hier gibt es kaum identische Pixelsequenzen. Der LZW-Algorithmus kann nur sehr wenige Muster in das Wörterbuch aufnehmen, die sich wiederholen. Dies stellt eine Schwäche dar (geringe Kompression).
+	\item \textbf{Bild B (Grafik/Logo):} Ein Google-Logo auf einfarbigem Hintergrund. Hier dominieren große einfarbige Flächen. Diese zeichnen sich durch extrem lange Ketten identischer Indizes aus. Ein einziger kurzer Code im Wörterbuch kann so riesige Bildbereiche abdecken, was zu einer exzellenten Kompressionsrate führt.
+\end{itemize}
+
+\subsection{Stärken und Schwächen (Worst-Case)}
+\begin{itemize}
+	\item \textbf{Stärken:}
+	\item \textbf{Schwächen:} Komplexe Verläufe und detailreiche Fotos. 
+	\item \textbf{Worst-Case:} Ein Bild, bei dem alle benachbarten Pixel unterschiedliche Farben haben. In diesem Fall kann der Algorithmus keine Sequenzen bilden, die länger als ein einzelnes Zeichen sind, wodurch die Datei durch den Overhead der Codes sogar größer als die Originaldaten werden kann.
+\end{itemize}
+	
+	\section{Referenzen}
+	
+\end{document}
