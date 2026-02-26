@@ -99,10 +99,10 @@
 \section{Qualitätsbewertung über das Verfahren}
 Die Bewertung der Kompressionsgüte von GIF lässt sich auf einen zentralen Merksatz reduzieren: \textbf{Der LZW-Algorithmus arbeitet am besten bei vielen sich wiederholenden Sequenzmustern.} Je höher die Redundanz innerhalb der Bilddaten, desto effektiver ist die Kompressionsrate.
 
-\subsection{Fallstudie: Grafik vs. Fotografie}
+\subsection{Fallstudie: Vergleich 2er Bilder}
 In der begleitenden Präsentation wurde dies anhand eines Vergleichsquiz verdeutlicht. Hierbei standen zwei Bildtypen gegenüber:
 \begin{itemize}
-	\item \textbf{Bild A (Detailreiches Foto):} Eine Landschaftsaufnahme mit komplexen Verläufen, Rauschen und vielen verschiedenen Farben. Hier gibt es kaum identische Pixelsequenzen. Der LZW-Algorithmus kann nur sehr wenige Muster in das Wörterbuch aufnehmen, die sich wiederholen. Dies stellt eine Schwäche dar (geringe Kompression).
+	\item \textbf{Bild A (Detailreiches Foto):} Eine Landschaftsaufnahme mit komplexen Verläufen, Rauschen und vielen verschiedenen Farben. Hier gibt es kaum identische Pixelsequenzen. Der LZW-Algorithmus kann nur sehr wenige Muster in das Wörterbuch aufnehmen, die sich wiederholen.
 	\item \textbf{Bild B (Grafik/Logo):} Ein Google-Logo auf einfarbigem Hintergrund. Hier dominieren große einfarbige Flächen. Diese zeichnen sich durch extrem lange Ketten identischer Indizes aus. Ein einziger kurzer Code im Wörterbuch kann so riesige Bildbereiche abdecken, was zu einer exzellenten Kompressionsrate führt.
 \end{itemize}
 
@@ -110,7 +110,7 @@ In der begleitenden Präsentation wurde dies anhand eines Vergleichsquiz verdeut
 \begin{itemize}
 	\item \textbf{Stärken:}
 	\item \textbf{Schwächen:} Komplexe Verläufe und detailreiche Fotos. 
-	\item \textbf{Worst-Case:} Ein Bild, bei dem alle benachbarten Pixel unterschiedliche Farben haben. In diesem Fall kann der Algorithmus keine Sequenzen bilden, die länger als ein einzelnes Zeichen sind, wodurch die Datei durch den Overhead der Codes sogar größer als die Originaldaten werden kann.
+	\item \textbf{Worst-Case:} Ein Bild, bei dem alle benachbarten Pixel unterschiedliche Farben haben. In diesem Fall kann der Algorithmus keine Sequenzen bilden, die länger als ein einzelnes Zeichen sind.
 \end{itemize}
 
 \section{Präsentation/ Demonstrations Kit} 
