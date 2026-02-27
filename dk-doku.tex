@@ -1,0 +1,486 @@
+\documentclass[a4paper,11pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[style=alphabetic]{biblatex}
+\addbibresource{quellen.bib}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\hypersetup{ %Textinterne Links in blau, url-Links in rot
+	colorlinks,
+	linkcolor={blue},
+	urlcolor={red}
+}
+
+
+\title{\Huge GIF-Format \\
+\vspace{0.75cm}
+{\includegraphics[width=4cm]{logo2.png}}}
+
+
+\author{
+  \begin{tabular}{l l}
+    Kristijan Kreso & 8241173 \\
+    Mark Ian Braun & 8175858 \\
+  \end{tabular}
+}
+
+\publishers{
+    \vspace{1cm} % Ein bisschen Abstand nach oben
+    \large % Kurs-Infos etwas dezenter
+    \textbf{Aktuelle Themen der Angewandten Informatik: Datenkompression} \\[0.5ex]
+    \smallskip
+    \small
+    Johann Wolfgang Goethe-Universität Frankfurt am Main \\[0.5ex]
+    FB Informatik und Mathematik \\[0.5ex]
+    Institut für Informatik -- Graphische Datenverarbeitung \\[0.5ex]
+    Dozent: Dr.-Ing. The Anh Vuong
+}
+
+\date{
+\vspace{0.5cm}
+\today}
+
+\theoremstyle{definition} % Bewirkt, dass der Text im Theorem aufrecht (nicht kursiv) steht
+\newtheorem{merksatz}{Merksatz}[section]
+\newtheorem{defi}{Definition}[section]
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\vfill
+
+\begin{center}
+{\large % Macht den Text in der Tabelle eine Stufe größer
+\renewcommand{\arraystretch}{1.5} % Verdoppelt den Platz in den Zellen (Standard ist 1.0)
+\begin{tabular}{|l|l|}
+    \hline
+    \textbf{Erstellt am} & 02.\ Februar 2026 \\ \hline
+    \textbf{Status} & fertig gestellt / Abgeben \\ \hline
+\end{tabular}
+}
+\end{center}
+\vspace{1cm} % Kleiner Puffer zum ganz unteren Rand
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Thema}
+Im Rahmen der folgenden Ausarbeitung werden das GIF-Format und das ihm zugrundeliegende Kompressionsverfahren analysiert. Der Fokus liegt dabei auf der \textbf{verlustfreien Datenkompression}, die durch den \textbf{Lempel-Ziv-Welch-Algorithmus (LZW)} realisiert wird. Im Anschluss wird ein webbasiertes Visualiserungstool vorgestellt, welches den Kompressions- und Dekompressionsprozess schrittweise demonstriert.
+
+%-----------------------------------------------------------------------------------
+\section{Theoretische Grundlagen}\label{kap:theo}
+
+\subsection{Geschichtlicher Hintergrund}
+Die Entwicklung des GIF-Formats (\textit{\glqq Graphics Interchange Format\grqq}) geht auf den Informatiker Steve Wilhite und sein Team beim US-amerikanischen Onlinedienst \glqq CompuServe\grqq{} zurück. Die Veröffentlichung der ersten Spezifikation erfolgte im Juni 1987.
+
+Primäres Ziel der Entwicklung war es, ein effizientes Farbformat zu schaffen, welches die bis dahin verbreiteten, technisch limitierten Schwarz-Weiß-Formate (wie z.\,B. XBM) ersetzte und gleichzeitig die Ladezeiten für Bilddateien über die damals langsamen Datenverbindungen minimierte \parencite{adobe_gif_details}.
+
+\smallskip
+In der Folgezeit erschienen zwei Hauptversionen des Formats: die ursprüngliche Version \glqq 87a\grqq{} sowie die 1989 veröffentlichte Erweiterung \glqq 89a\grqq{}, welche bis heute den Standard darstellt. Ein wesentlicher Unterschied dieser Versionen liegt in der Funktionsvielfalt: Während die erste Spezifikation primär auf \textit{statische Bilder} ausgelegt war, führte der \glqq 89a\grqq-Standard die Möglichkeit ein, mehrere Einzelbilder in einer Datei zu speichern. Durch diese Erweiterung wurde die Darstellung von \textit{Animationen} realisierbar, was maßgeblich zur langfristigen Etablierung des Formats im Web beitrug.
+
+%--------------------------------------------------------------------------------
+\subsection{Technische Merkmale}
+GIF zählt zu den \textit{Bitmap-basierten} Grafikformaten. Dies bedeutet, dass den Bilddaten ein zweidimensionales Bildraster zugrunde liegt -- eine Matrix aus Bildpunkten (Pixeln), wobei jeder Pixel eine spezifische Farbinformation trägt \parencite{adobe_raster_basics}.
+
+Ein charakteristisches Merkmal und zugleich die wesentliche Limitierung von GIF ist die Beschränkung der Farbtiefe auf maximal \textbf{8 Bit} (1 Byte) pro Pixel.
+Daraus ergibt sich, dass innerhalb eines einzelnen Bildframes höchstens $2^8 = 256$ verschiedene Farben gleichzeitig dargestellt werden können. Im Vergleich zu moderneren Formaten wie JPEG oder PNG, die eine Farbtiefe von bis zu 24 Bit (3 Byte) unterstützen und somit über 16 Millionen Farben
+\footnote{bei 24 Bit Farbtiefe (8 Bit pro RGB-Kanal) ergeben sich $2^{24} \approx 16{,}7$ Millionen mögliche Farbwerte.}
+abbilden können, ist die Farbdarstellung bei GIF deutlich reduziert.
+
+Um die Datenmenge effizient zu verwalten, speichert GIF nicht für jeden Pixel den direkten RGB-Farbcode. Stattdessen basiert die technische Umsetzung auf einer \textit{indizierten Farbpalette}. Hierbei werden die benötigten RGB-Werte in einer zentralen Tabelle (Color-Table) abgelegt, während für die Darstellung des eigentlichen Bildinhaltes lediglich die entsprechenden \textbf{Farbindizes} verwendet werden.
+
+Auf diese Weise wird im Gegensatz zum True-Color-Verfahren (3 Byte pro Pixel) nur 1 Byte pro Pixel benötigt. Jeder Farbindex referenziert damit eindeutig den jeweiligen Eintrag in der Farbpalette.
+
+\begin{table}[ht]
+\begin{center}
+\caption{Schema der indizierten Farbpalette}
+\label{tab:farbpalette}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Index} & \textbf{Farbwert} \\ \hline
+0              & \textcolor[HTML]{00FF00}{\#00FF00} \\ \hline
+1              & \textcolor[HTML]{DB1010}{\#DB1010} \\ \hline
+2              & \textcolor[HTML]{00C8FF}{\#00C8FF} \\ \hline
+3              & \textcolor[HTML]{C100FF}{\#C100FF} \\ \hline
+...            & ... \\ \hline
+255            & \textcolor[HTML]{000000}{\#000000} \\ \hline
+\end{tabular}
+\\[1ex] % Kleiner Abstand
+\small{Hinweis: Die gewählten Farben dienen lediglich als Beispiel.}
+\end{center}
+\end{table}
+
+Für die anschließende algorithmische Verarbeitung werden die Bilddaten nicht in ihrer zweidimensionalen Matrixform belassen. Stattdessen erfolgt eine Serialisierung der Daten: Das Bildraster wird zeilenweise, beginnend von der oberen linken Ecke bis zur unteren rechten Ecke, ausgelesen und in eine \textbf{lineare Sequenz} transformiert. Diese resultierende Kette aus Farbindizes dient als unmittelbarer Input für den Kompressionsalgorithmus.
+
+Trotz quantitativer Einschränkungen bei der Farbtiefe arbeitet der eigentliche Kompressionsalgorithmus \textbf{verlustfrei}. Dies garantiert, dass die ursprüngliche Sequenz der Farbindizes nach der Dekompression \glqq 1:1\grqq{} rekonstruiert werden kann, wodurch die ursprünglichen Bilddaten ohne jeglichen Qualitätsverlust wiederhergestellt werden.
+
+%--------------------------------------------------------------------------------
+\subsection{Aufbau einer GIF-Datei}
+Eine GIF-Datei ist modular aufgebaut und besteht aus verschiedenen Abschnitten \parencite{gif89a}.
+
+\begin{itemize}
+    \item \textbf{Header} (Signatur und Version)
+    \item \textbf{Logical Screen Descriptor} (Bilddimensionen)
+    \item \textbf{Global Color Table} (Globale Farbtabelle)
+    \item \textbf{Graphic Control Extension} (Steuerung von Transparenz und Animation)
+    \item \textbf{Image Descriptor \& Image Data} (Bildposition und komprimierte Daten)
+    \item \textbf{Application Extension} (Zusatzfunktionen wie die Endlosschleife)
+    \item \textbf{Trailer} (Datei-Abschluss)
+\end{itemize}
+
+\vspace{1em}
+
+\noindent \textbf{Header:}
+Der Header markiert den Beginn der Datei und besteht aus sechs Bytes. Die ersten drei Bytes enthalten die Signatur \texttt{GIF}, gefolgt von der Versionsnummer (meist \texttt{89a}). Dieser Block dient der eindeutigen Identifikation des Dateityps durch den Decoder.
+
+\bigskip
+
+\noindent \textbf{Logical Screen Descriptor:}
+Dieser Abschnitt legt den \glqq Rahmen\grqq{} des Bildes fest. Er definiert die Gesamtbreite und -höhe der Leinwand sowie den Hintergrundfarb-Index. Zudem signalisiert er über ein Flag, ob eine globale Farbtabelle folgt.
+
+\bigskip
+
+\noindent \textbf{Global Color Table:}
+Wie in dem vorherigen \hyperref[tab:farbpalette]{Unterabschnitt} erläutert, fungiert dieser Block als zentrale \glqq Mischpalette\grqq{}. Er listet die bis zu 256 verwendeten RGB-Farbwerte auf, die referenziert werden können.
+
+\bigskip
+
+\noindent \textbf{Graphic Control Extension (GCE):}
+Dieser Block ist essenziell für moderne GIF-Funktionen. Er definiert die Verzögerungszeit bei Animationen sowie den Transparenz-Index, welcher bestimmt, welcher Farbwert der Palette als „durchsichtig“ behandelt wird.
+
+\bigskip
+
+\noindent \textbf{Image Descriptor \& Table Based Image Data:}
+Der Descriptor gibt die exakten Koordinaten des Bildes auf der Leinwand an. Die darauf folgenden Bilddaten sind das Kernstück: Sie enthalten die mittels \textbf{LZW-Algorithmus} komprimierten Farbindizes (siehe Kapitel 3).
+
+\bigskip
+
+\noindent \textbf{Application Extension:}
+Hier werden anwendungsspezifische Informationen hinterlegt. Die bekannteste ist der \textit{Netscape Looping Block}, der Webbrowsern mitteilt, wie oft eine Animationssequenz wiederholt werden soll.
+
+\bigskip
+
+\noindent \textbf{Trailer:}
+Das Ende der Datei wird durch ein einzelnes Byte mit dem Wert \texttt{0x3B} (Hexadezimal für ein Semikolon) markiert. Es signalisiert dem Decoder den Abschluss des Datenstroms.
+
+\section{Verfahren-Beschreibung}\label{kap:algo}
+
+Das funktionale Herzstück der GIF-Kompression ist der Lempel-Ziv-Welch-Algorithmus. Es handelt sich um ein verlustfreies, wörterbuchbasiertes Verfahren, dessen Effizienz darauf beruht, wiederkehrende Muster in der Datenfolge zu erkennen und durch kurze Referenzcodes zu ersetzen \parencite{salomon2007}.
+
+\subsection{Prinzip und Initialisierung}
+Die grundlegende Idee des LZW-Verfahrens im GIF-Format ist die Verwendung eines dynamischen Wörterbuchs. Damit der Prozess verlustfrei funktioniert, müssen Encoder und Decoder mit demselben Grundalphabet starten. Dieses Initialwörterbuch umfasst alle möglichen Einzelwerte der 8-Bit-Farbtiefe sowie zwei spezielle Steuerzeichen \parencite{BlackstockLZW}.
+
+Ein entscheidender Vorteil des LZW-Verfahrens ist, dass das während der Kompression aufgebaute Wörterbuch \textbf{nicht} in der Datei gespeichert werden muss. Da der Algorithmus einer festen Logik folgt, kann der Decoder das Wörterbuch während der Dekompression \textit{on-the-fly} (schrittweise) absolut identisch rekonstruieren.
+
+\begin{table}[ht]
+\begin{center}
+\caption{Initialisierung des LZW-Wörterbuchs}
+\label{tab:lzw_init}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Sequenz} & \textbf{Code} \\ \hline
+0                & 0             \\ \hline
+1                & 1             \\ \hline
+\dots            & \dots         \\ \hline
+255              & 255           \\ \hline
+CLEAR            & 256           \\ \hline
+EOI              & 257           \\ \hline
+\end{tabular}
+\\[1ex]
+\small{Hinweis: Die Codes 256 (Clear Code) und 257 (End of Information) sind reservierte Steuerzeichen zur Steuerung des Decoders.}
+\end{center}
+\end{table}
+
+\subsection{Der Kompressionsprozess (Encoding)}
+Der Encoder liest die lineare Sequenz der Farbindizes ein und versucht, immer längere Ketten im Wörterbuch zu finden. Der folgende Pseudocode beschreibt diesen Prozess:
+
+\begin{quote}
+\begin{tabbing}
+\hspace{0.5cm} \= \hspace{0.5cm} \= \hspace{0.5cm} \= \kill
+\textbf{LW} := \texttt{\dq{}\dq{}} \;(Leeres Wort) \\
+\textbf{Solange} noch Zeichen vorhanden: \\
+\> \textbf{Z} := lies nächstes Zeichen \\
+\> \textbf{Falls} (\textbf{LW} + \textbf{Z}) im Wörterbuch: \\
+\> \> \textbf{LW} := \textbf{LW} + \textbf{Z} \\
+\> \textbf{Sonst}: \\
+\> \> Füge (\textbf{LW} + \textbf{Z}) ins Wörterbuch ein \\
+\> \> Gib \textbf{Code}(\textbf{LW}) aus \\
+\> \> \textbf{LW} := \textbf{Z} \\
+\textbf{Falls} \textbf{LW} != \texttt{\dq{}\dq{}}: \\
+\> Gib \textbf{Code}(\textbf{LW}) aus
+\end{tabbing}
+\end{quote}
+
+\bigskip
+
+\subsection{Der Dekompressionsprozess (Decoding)}
+Der Decoder empfängt die Codes als Input und schlägt sie in seinem Wörterbuch nach. Er ist asymmetrisch zum Encoder aufgebaut, da er auch einen Spezialfall behandeln muss, bei dem ein Code empfangen wird, der gerade erst im Wörterbuch erstellt wird.
+
+\begin{quote}
+\begin{tabbing}
+\hspace{0.5cm} \= \hspace{0.5cm} \= \hspace{0.5cm} \= \kill
+\textbf{c} := Lies ersten Code aus dem Input-Stream \\
+\textbf{J} := \textbf{W}[\textbf{c}] \;(Wörterbucheintrag für c) \\
+Gib \textbf{J} aus \\
+\textbf{I} := \textbf{J} \\
+\textbf{Solange} noch Codes vorhanden: \\
+\> \textbf{c} := Lies nächsten Code \\
+\> \textbf{Falls} \textbf{c} im Wörterbuch: \\
+\> \> \textbf{J} := \textbf{W}[\textbf{c}] \\
+\> \textbf{Sonst}: \\
+\> \> \textbf{J} := \textbf{I} + \textbf{I}[0] \;(Spezialfall: Unbekannter Code) \\
+\> Füge (\textbf{I} + \textbf{J}[0]) ins Wörterbuch ein \\
+\> Gib \textbf{J} aus \\
+\> \textbf{I} := \textbf{J}
+\end{tabbing}
+\end{quote}
+
+\bigskip
+%---------------------------------------------------------------------------------
+\section{Anwendungsgebiet}\label{kap:use}
+Die Relevanz des GIF-Formats hat sich über die Jahrzehnte stark gewandelt. Während es ursprünglich als technologische Notwendigkeit entstand, nimmt es heute eine Sonderrolle in der digitalen Kommunikation ein.
+
+\subsection{Historische Entwicklung und Etablierung}
+In den ersten Jahren des World Wide Web war GIF, neben dem Schwarz-Weiß-Bildformat XBM, das maßgebliche Standardformat für Grafiken. Ein wesentlicher Vorteil war dabei die Unterstützung von Farbe sowie – mit der Version \texttt{89a} – die Möglichkeit, Transparenz und Animationen darzustellen.
+
+Im Laufe der Jahre wurde GIF jedoch zunehmend von moderneren Grafikformaten überholt und in vielen Bereichen verdrängt. Grafikformate wie JPEG oder PNG ermöglichten im Vergleich zu GIF eine deutlich effizientere Kompression sowie eine weitaus höhere Farbtiefe. Durch diese technische Überlegenheit konnten Bildinhalte wesentlich detailgetreuer und speicherschonender dargestellt werden, wodurch GIF gerade für digitale Fotografien zunehmend an Bedeutung verlor \parencite{adobe_gif_details}.
+
+\subsection{Das Comeback in der Social-Media-Ära}
+Trotz der technischen Limitierungen erlebten GIF-Animationen ab den 2010er Jahren ein überraschendes Comeback im Web. Als Hauptgrund hierfür gilt die Popularität von Bilder-Foren und Plattformen wie \textit{Tumblr}, \textit{Reddit} oder \textit{4chan}. Dort wurde das Format genutzt, um kurze, geloopte Sequenzen wie Cinemagramme oder Stereogramme zu erstellen \parencite{gif_comeback}.
+
+Ein entscheidender Meilenstein war das Jahr 2015, als auch Facebook begann, das Format nativ zu unterstützen, nachdem dies zuvor abgelehnt worden war. In der Folge integrierten nahezu alle großen Messenger-Dienste wie WhatsApp, Instagram und Slack eigene GIF-Suchmaschinen.
+
+\subsection{Heutige Bedeutung}
+Zusammenfassend lässt sich festhalten, dass das GIF-Format trotz seiner technologischen Unterlegenheit gegenüber moderneren Bildformaten in vielen Bereichen des heutigen Internets eine unverzichtbare Sonderrolle behält. Dies hängt vor allem mit der Option der Animationsdarstellung und der universellen Kompatibilität zusammen. Heute wird das Format primär in folgenden Bereichen eingesetzt:
+
+\begin{itemize}
+    \item \textbf{Digitale Kommunikation (Memes und Loops):} GIF fungiert als globales kulturelles Ausdrucksmittel für kurze, tonlose Reaktionen und Animationen, die in sozialen Netzwerken und Messengern fest integriert sind.
+    \item \textbf{Grafikelemente (Logos und Icons):} Für einfache Grafiken mit geringer Farbanzahl bietet das Format eine verlustfreie Darstellung, die auf allen Endgeräten ohne Qualitätsverlust gerendert werden kann.
+    \item \textbf{E-Mail-Marketing:} Da viele E-Mail-Clients die Einbettung von Videodateien blockieren, bleibt das GIF-Format die einzige verlässliche Methode, um bewegte Inhalte direkt in Newslettern oder Werbe-Mails darzustellen.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{giphy_screenshot.png}
+    \caption{Die Plattform GIPHY veranschaulicht die heutige Rolle des GIF-Formats als zentrales Medium für die visuelle Kommunikation und als Datenbank für animierte Kurzsequenzen.}
+    \label{fig:giphy}
+\end{figure}
+
+%---------------------------------------------------------------------------------
+\section{Qualitätsbewertung des Verfahrens}\label{kap:bew}
+
+Die Kompressionsgüte des im GIF-Format verwendeten LZW-Algorithmus ist maßgeblich von der Struktur bzw.\ der Redundanz der zugrundeliegenden Bilddaten abhängig.
+
+\begin{merksatz}[Effizienz von LZW]
+Der LZW-Algorithmus arbeitet am effektivsten bei Daten mit vielen sich wiederholenden Sequenzmustern. Je höher die \textbf{Redundanz} innerhalb der Input-Sequenz, desto höher ist die resultierende Kompressionsrate.
+\end{merksatz}
+
+\subsection{Best-Case: Maximale Redundanz}
+Der Idealfall für das Verfahren tritt bei großen, einfarbigen Flächen auf, wie sie häufig in Logos, Icons oder technischen Tabellen vorkommen.
+
+In diesem Szenario entstehen extrem lange Ketten identischer Farbindizes. Da das Wörterbuch während des Encoding-Prozesses schrittweise immer längere Sequenzen speichert, können riesige Bildbereiche durch einen einzigen, relativ kurzen Referenzcode dargestellt werden. Die Kompression ist hier maximal effizient, da die Menge der ausgegebenen Codes im Vergleich zur Anzahl der ursprünglichen Pixel minimal ist.
+
+\subsection{Schwächen und Worst-Case}
+Die Kompressionsleistung sinkt signifikant, sobald das Bild eine hohe Entropie (Unordnung) aufweist. Dies ist insbesondere bei folgenden Bildinhalten der Fall:
+\begin{itemize}
+    \item Komplexe Farbverläufe und detailreiche Fotografien.
+    \item Bildrauschen oder stark texturierte Oberflächen.
+    \item Eine hohe Anzahl unterschiedlicher, unregelmäßig wechselnder Farben.
+\end{itemize}
+
+\begin{defi}[Worst-Case der Kompression]
+Der theoretische \textbf{Worst-Case} tritt ein, wenn alle aufeinanderfolgenden Pixel eines Bildes unterschiedliche Farben aufweisen.
+\end{defi}
+
+\noindent \textbf{Beispiel:} Betrachten wir ein Raster von $5 \times 5$ Pixeln, bei dem jeder Pixel eine eindeutige Farbe trägt (z.\,B. die Indizes $1, 2, 3, \dots, 25$). Da keine Sequenz doppelt auftritt, kann der Algorithmus keine Muster in das Wörterbuch übernehmen, die später erneut referenziert werden könnten. Der Output wäre gleich wie die ursprüngliche Sequenz. Die effektive Kompressionsrate wäre in diesem Fall gleich Null.
+
+\section{Präsentation / Demonstration Kit}
+
+%--------------------------------------------------------------------------------
+Das im Rahmen dieser Arbeit entwickelte webbasierte Visualisierungstool, der \textbf{GIF Compression Visualizer}, dient der interaktiven Vermittlung des LZW-Algorithmus. Das primäre Ziel der Anwendung ist es, die Abläufe der Wörterbuchbildung und Code-Generierung schrittweise und visuell nachvollziehbar zu machen.
+
+\subsection{Zielsetzung und Konzept}
+Die Anwendung wurde entworfen, um die theoretischen Konzepte aus \hyperref[kap:algo]{Kapitel 3} in eine praktische Lernumgebung zu überführen. Anstatt den Kompressionsvorgang als geschlossenen Prozess zu behandeln, ermöglicht das Tool eine detaillierte Beobachtung der Datenverarbeitung in Echtzeit. Ein wesentlicher Aspekt ist dabei die Flexibilität: Nutzer können eigene Bilddateien hochladen, wodurch die Auswirkungen unterschiedlicher Bildstrukturen auf die Kompressionseffizienz (wie in \hyperref[kap:bew]{Kapitel 5} analysiert) direkt sichtbar werden.
+
+\subsection{Technische Umsetzung}
+Das Tool wurde als moderne Web-Anwendung realisiert. Wir haben dafür \textbf{HTML5, CSS und JavaScript} verwendet, da dies eine plattformunabhängige Nutzung ohne zusätzliche Installation ermöglicht. Die gesamte Logik des LZW-Algorithmus wurde in JavaScript implementiert, um eine flüssige, clientseitige Visualisierung der Rechenschritte zu garantieren.
+
+\subsection{Start der Applikation}
+Die Anwendung wird durch das Öffnen der \texttt{index.html} über einen lokalen Webserver (z.\,B. auf einem definierten Localhost-Port) im Browser gestartet. Um die visuelle Darstellung der Benutzeroberfläche, insbesondere die Kontraste der Syntax-Hervorhebung, optimal zu nutzen, sollte der Browser im \textbf{Dark Mode} betrieben werden.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{kit1.png}
+    \caption{Die Initialansicht des GIF Compression Visualizers vor dem Daten-Upload.}
+    \label{fig:kit1}
+\end{figure}
+
+Nach der Initialisierung präsentiert sich das Tool mit einer leeren Arbeitsfläche, wie in \autoref{fig:kit1} zu sehen ist. Die Benutzeroberfläche ist intuitiv gestaltet:
+\begin{itemize}
+    \item \textbf{Header-Sektion:} Enthält die Titelzeile sowie die zentralen Steuerungselemente (\textit{Demo Starten, Pause, Fortsetzen, Reset}) und den Geschwindigkeitsregler für die Schritt-für-Schritt-Visualisierung.
+    \item \textbf{Input-Modul:} Dies ist der erste Interaktionspunkt für den Nutzer. Über die Schaltfläche \glqq Durchsuchen...\grqq{} kann eine lokale Bilddatei ausgewählt und in den Visualisierer geladen werden.
+    \item \textbf{Vorschau-Bereich:} Sobald ein Bild ausgewählt wurde, dient die Sektion unter dem Upload-Feld als visuelle Referenz für das zu komprimierende Ausgangsmaterial.
+\end{itemize}
+
+Nachdem die Anwendung erfolgreich gestartet wurde, erfolgt die aktive Interaktion des Nutzers mit dem System.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{kit2.png}
+        \caption{Detailansicht des Input-Moduls mit der Upload-Schaltfläche.}
+        \label{fig:kit2}
+    \end{center}
+\end{figure}
+
+Wie in \autoref{fig:kit2} dargestellt, kann der Anwender nun auf die Schaltfläche \glqq Durchsuchen...\grqq{} klicken. Es öffnet sich der Dateidialog des Betriebssystems, welcher es erlaubt, ein beliebiges Bild auszuwählen. In diesem Moment liest das Tool die Rohdaten der Grafik ein und beginnt im Hintergrund mit der Vorbereitung der Datenstrukturen für den Kompressionsvorgang.
+
+
+Sobald eine Datei ausgewählt wurde (in diesem Beispiel die Datei \texttt{test\_very\_smal.gif}), visualisiert das Tool die Transformation der Bilddaten in eine verarbeitbare Form.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit3.png}
+        \caption{Darstellung des geladenen Testbildes und der daraus extrahierten Farbindizes.}
+        \label{fig:kit3}
+    \end{center}
+\end{figure}
+
+Wie in \autoref{fig:kit3} zu sehen ist, wird das hochgeladene Bild im zentralen Vorschaubereich angezeigt. Direkt darunter generiert das Tool ein korrespondierendes Raster, welches die einzelnen Pixel durch ihre jeweiligen Werte aus der Farbtabelle (Farbindizes) ersetzt.
+
+Diese Matrix dient als direkte \textbf{Input-Sequenz} für den LZW-Algorithmus. Durch diese Gegenüberstellung wird für den Anwender sofort ersichtlich, wie das eigentliche Bild durch entsprechende Farbindizes repräsentiert wird.
+
+Nachdem die Bilddaten erfolgreich eingelesen und als Index-Raster visualisiert wurden, kann die eigentliche Kompressions-Simulation initiiert werden.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{kit4.png}
+        \caption{Die Schaltfläche zum Starten der interaktiven Simulation.}
+        \label{fig:kit4}
+    \end{center}
+\end{figure}
+
+Durch Betätigen der Schaltfläche \glqq Demo Starten\grqq{} (siehe \autoref{fig:kit4}) beginnt das Tool mit der schrittweisen Abarbeitung der Input-Sequenz. In diesem Modus durchläuft der Algorithmus das Pixel-Raster von oben links nach unten rechts.
+
+Der Anwender kann nun beobachten, wie das Tool die Steuerung übernimmt: Die aktuell verarbeiteten Pixel im Raster werden hervorgehoben, während simultan die entsprechenden Zeilen im Pseudocode-Fenster aufleuchten und das Wörterbuch dynamisch erweitert wird. Über den Geschwindigkeitsregler kann dieser Prozess jederzeit verlangsamt werden, um die Entstehung einzelner Code-Ausgaben im Detail nachzuvollziehen.
+
+Während die Simulation läuft, dokumentiert das Tool die interne Logik des Algorithmus durch eine synchrone Aktualisierung aller Module.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit5.png}
+        \caption{Live-Visualisierung der LZW-Prozessschritte, des Pseudocode-Status und des Output-Datenstroms.}
+        \label{fig:kit5}
+    \end{center}
+\end{figure}
+
+In \autoref{fig:kit5} wird die operative Arbeitsweise des Visualisierers deutlich:
+\begin{itemize}
+    \item \textbf{Pseudocode-Tracking:} Im Fenster \textit{LZW Algorithmus} wird die aktuell ausgeführte Zeile (hier: \texttt{Gib Code(LW) aus}) farblich hervorgehoben. Dies ermöglicht es dem Nutzer, die abstrakte Programmlogik direkt mit der Datenmanipulation zu verknüpfen.
+    \item \textbf{Prozess-Tabelle:} Das Modul \textit{LZW Prozess-Schritte} liefert eine lückenlose Historie. Es zeigt präzise, wie aus der Kombination von \textit{letztem Wort} (LW) und \textit{aktuellem Zeichen} (Z) neue Einträge für das Wörterbuch generiert werden (z.\,B. Sequenz \texttt{0 1 2} mit dem neuen Code \texttt{262}).
+    \item \textbf{Output Datenstrom:} Hier wird die resultierende Codefolge in Echtzeit aufgebaut. Besonders hervorzuheben ist die automatische Voranstellung des \textit{Clear Codes} (Index 256), der den Beginn eines GIF-Datenstroms markiert.
+\end{itemize}
+Der Nutzer kann durch diese parallele Darstellung genau nachvollziehen, warum bestimmte Codes ausgegeben werden und wie das Wörterbuch sukzessiv mit Mustern gefüllt wird, die bei erneutem Auftreten die Datenmenge reduzieren.
+
+Nachdem der Algorithmus die gesamte Input-Sequenz verarbeitet hat, wird der Prozess mit einer detaillierten statistischen Auswertung abgeschlossen.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit6.png}
+        \caption{Abschließende Kompressions-Statistik und Download-Option.}
+        \label{fig:kit6}
+    \end{center}
+\end{figure}
+
+Wie in \autoref{fig:kit6} illustriert, blendet das Tool nach Beendigung des Vorgangs das Modul \textit{Kompressions-Statistik} ein. Hier werden die Ergebnisse quantifiziert:
+\begin{itemize}
+    \item \textbf{Originalgröße:} Die Dateigröße des unverarbeiteten Ausgangsbildes (hier: 4.00 KB).
+    \item \textbf{Komprimierte Größe:} Die resultierende Größe nach der LZW-Kodierung (hier: 0.80 KB).
+    \item \textbf{Platzersparnis:} Die prozentuale Reduktion der Datenmenge im Verhältnis zur Originaldatei. In diesem Beispiel wurde eine beachtliche Effizienz von \textbf{80.01\%} erzielt.
+\end{itemize}
+
+Zusätzlich bietet das Tool die Möglichkeit, die generierte Datei über die Schaltfläche \glqq Download GIF\grqq{} lokal zu speichern. Dieser finale Schritt untermauert die Praxistauglichkeit der Anwendung: Der Nutzer hat nicht nur einen theoretischen Prozess beobachtet, sondern tatsächlich eine Grafikdatei erstellt.
+
+\subsection{Verifikation durch Dekomprimierung}
+Ein wesentliches Qualitätsmerkmal des LZW-Verfahrens ist die vollständige Reversibilität der Datenkompression. Um diesen Aspekt zu überprüfen, bietet die Anwendung nach Abschluss der Kodierung eine Funktion zur Dekomprimierung an.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{kit7.png}
+        \caption{Schaltfläche zur Einleitung des Dekomprimierungsvorgangs.}
+        \label{fig:kit7}
+    \end{center}
+\end{figure}
+
+Durch Betätigen der Schaltfläche \glqq Dekodierung anzeigen\grqq{} (siehe \autoref{fig:kit7}) ist es möglich den inversen Prozess zu beobachten. Dabei wird der zuvor generierte Output-Datenstrom wieder in ein Pixel-Raster übersetzt.
+
+Dieser Schritt dient der abschließenden Kontrolle: Der Anwender kann das rekonstruierte Bild direkt mit dem ursprünglichen Input-Bild vergleichen. Die identische Darstellung beider Raster bestätigt die theoretischen Ausführungen zur Verlustfreiheit des GIF-Formats und schließt die praktische Demonstration des Verfahrens ab.
+
+\subsubsection{Initialisierung der Dekodierung}
+Mit Betätigen der Schaltfläche wechselt die Ansicht in das Dekodierungs-Modul. Hier wird ein wesentlicher Vorteil des LZW-Verfahrens sichtbar: Die Information über die dynamisch erstellten Wörterbucheinträge muss nicht in der Datei gespeichert sein, da der Decoder diese während des Lesevorgangs aus dem Datenstrom rekonstruiert.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit8.png}
+        \caption{Startansicht des Decoders mit initialisiertem Basis-Wörterbuch.}
+        \label{fig:kit8}
+    \end{center}
+\end{figure}
+
+In der Startansicht des Decoders (siehe \autoref{fig:kit8}) ist zu erkennen, dass lediglich das Basis-Wörterbuch (die Farbindizes) vorbesetzt ist. Die zuvor generierte Code-Folge wird nun als \textit{Input (Code-Sequenz)} bereitgestellt. Um den Prozess zu starten, steht dem Anwender unterhalb der Sequenz die Schaltfläche \glqq Dekodierung starten\grqq{} zur Verfügung. Analog zum Encoder-Modul wird auch hier die Logik durch einen spezifischen Pseudocode sowie eine Status-Anzeige der Variablen $C$, $I$ und $J$ visualisiert.
+
+\subsubsection{Ablauf der Dekodierung und Bildrekonstruktion}
+Während der Simulation der Dekodierung lässt sich beobachten, wie der Algorithmus die Code-Sequenz liest und daraus die ursprünglichen Farbmuster ableitet. Dieser Prozess wird durch die synchrone Aktualisierung des Decoder-Logikfensters und der Bildausgabe visualisiert.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit9.png}
+        \caption{Visualisierung des Dekodierungsvorgangs mit aktiver Zeilenhervorhebung im Pseudocode und Variablenstatus.}
+        \label{fig:kit9}
+    \end{center}
+\end{figure}
+
+In \autoref{fig:kit9} wird der aktuelle Zustand der Dekodierung dargestellt. Das Tool hebt die aktive Logik-Zeile im Pseudocode hervor (hier die Prüfung, ob ein Code bereits im Wörterbuch existiert). Gleichzeitig werden die Arbeitsvariablen $c$ (aktueller Code), $I$ (vorherige Sequenz) und $J$ (neu ausgegebene Sequenz) in Echtzeit aktualisiert. Parallel dazu wächst das \textit{LZW Wörterbuch} wieder an, indem die neu gelernten Sequenzen (z.\,B. Index 258 für die Folge \texttt{0 0}) eingetragen werden.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit10.png}
+        \caption{Schrittweise Rekonstruktion der Farbindizes und des grafischen Bildes.}
+        \label{fig:kit10}
+    \end{center}
+\end{figure}
+
+Simultan zur algorithmischen Verarbeitung erfolgt die visuelle Ausgabe im Modul \textit{Rekonstruiertes Bild} (siehe \autoref{fig:kit10}). Der \textit{Output Datenstrom (rekonstruiert)} zeigt die wiedergewonnenen Farbindizes, während im darunterliegenden Feld die entsprechenden Pixel in der korrekten Farbgebung gezeichnet werden.
+
+Durch diese schrittweise Rekonstruktion wird dem Anwender verdeutlicht, dass am Ende des Prozesses eine bitgenaue Kopie des ursprünglichen Bildes entsteht. Die Demonstration endet mit der vollständigen Wiederherstellung der Grafik, was die Korrektheit und Verlustfreiheit der implementierten LZW-Logik bestätigt.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{kit11.png}
+        \caption{Vollständig rekonstruiertes Bild nach Abschluss der Dekodierung.}
+        \label{fig:kit11}
+    \end{center}
+\end{figure}
+
+Wie in \autoref{fig:kit11} ersichtlich ist, führt die Abarbeitung der gesamten Code-Sequenz zur vollständigen Wiederherstellung der ursprünglichen Grafik. Das rekonstruierte Pixel-Raster entspricht in jedem Farbwert exakt dem in \autoref{fig:kit3} gezeigten Input-Raster.
+
+Dieser direkte Vergleich verifiziert die \textbf{Verlustfreiheit} des LZW-Algorithmus: Trotz der erheblichen Datenkompression (in diesem Fall ca. 80\,\%, siehe \autoref{fig:kit6}) gehen keine Bildinformationen verloren. Das Demonstration Kit bestätigt somit praktisch, dass das im GIF-Standard verwendete Verfahren eine effiziente Archivierung ohne qualitative Einbußen ermöglicht. Damit ist die Funktionskette der Anwendung – von der Analyse über die Kompression bis hin zur fehlerfreien Rekonstruktion – erfolgreich abgeschlossen.
+
+
+\newpage
+
+\printbibliography
+
+\end{document}
